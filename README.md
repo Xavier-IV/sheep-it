@@ -30,6 +30,106 @@ rm -rf sheep-it
 - [Claude Code](https://claude.ai/code) installed
 - [GitHub CLI](https://cli.github.com/) installed and authenticated (`gh auth login`)
 
+---
+
+## Quick Start (First Time)
+
+**Already have a project on GitHub?**
+```bash
+cd your-project
+/sheep:init              # Just sets up project board
+```
+
+**Starting fresh?**
+```bash
+/sheep:init "my-app"     # Creates private repo + board
+```
+
+That's it! Now you can start working.
+
+---
+
+## Day-to-Day Workflow
+
+Here's what your typical day looks like with Sheep It:
+
+### Morning: Check what needs doing
+```bash
+/sheep:progress          # See all milestones and tasks
+/sheep:tasks             # List open tasks
+```
+
+### Pick a task and start working
+```bash
+/sheep:start 22          # Creates branch, assigns to you
+                         # → Card moves to "In Progress"
+```
+
+### Code, commit, repeat...
+```bash
+# Just your normal coding workflow
+git add .
+git commit -m "feat: add login form"
+```
+
+### Done? Ship it!
+```bash
+/sheep:it 22             # Creates PR linked to issue #22
+                         # → Card moves to "Review"
+```
+
+### After PR merged
+```bash
+# Issue auto-closes, card moves to "Done" ✓
+# Ready for next task!
+/sheep:start 23
+```
+
+### End of milestone? Release it
+```bash
+/sheep:release v1.0.0    # Creates GitHub release
+                         # → Milestone closes
+```
+
+---
+
+## Visual Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         YOUR DAY                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   /sheep:progress      "What needs doing?"                      │
+│         ↓                                                       │
+│   /sheep:start 22      "I'll work on this"                      │
+│         ↓              → creates branch                         │
+│                        → assigns to you                         │
+│      [CODE]            → moves card to In Progress              │
+│         ↓                                                       │
+│   /sheep:it 22         "Done! Ship it 🐑"                       │
+│         ↓              → creates PR                             │
+│                        → moves card to Review                   │
+│    [PR MERGED]                                                  │
+│         ↓              → issue auto-closes                      │
+│                        → card moves to Done ✓                   │
+│                                                                 │
+│   Repeat for next task...                                       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+Board View:
+┌──────────┐   ┌─────────────┐   ┌────────┐   ┌──────┐
+│ Backlog  │ → │ In Progress │ → │ Review │ → │ Done │
+├──────────┤   ├─────────────┤   ├────────┤   ├──────┤
+│ #24      │   │ #22 ← you   │   │ PR #45 │   │ ✓#21 │
+│ #25      │   │             │   │        │   │ ✓#20 │
+└──────────┘   └─────────────┘   └────────┘   └──────┘
+   task           start             it         merged
+```
+
+---
+
 ## Why Sheep It?
 
 | Traditional (GSD) | Sheep It |
