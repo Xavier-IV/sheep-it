@@ -2,7 +2,8 @@
 name: sheep:progress
 description: Show milestone progress with issue breakdown
 allowed-tools:
-  - Bash
+  - Bash(gh api repos/:owner/:repo/milestones *)
+  - Bash(gh issue list *)
 ---
 
 <objective>

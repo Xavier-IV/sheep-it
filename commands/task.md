@@ -2,7 +2,9 @@
 name: sheep:task
 description: Create a GitHub Issue
 allowed-tools:
-  - Bash
+  - Bash(gh issue create *)
+  - Bash(gh label list *)
+  - Bash(gh api repos/:owner/:repo/milestones *)
 ---
 
 <objective>

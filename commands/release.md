@@ -2,7 +2,11 @@
 name: sheep:release
 description: Create GitHub Release for a milestone
 allowed-tools:
-  - Bash
+  - Bash(gh api repos/:owner/:repo/milestones *)
+  - Bash(gh issue list *)
+  - Bash(gh release create *)
+  - Bash(git tag *)
+  - Bash(git push *)
 ---
 
 <objective>

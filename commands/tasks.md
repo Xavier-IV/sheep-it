@@ -2,7 +2,7 @@
 name: sheep:tasks
 description: List open GitHub Issues
 allowed-tools:
-  - Bash
+  - Bash(gh issue list *)
 ---
 
 <objective>

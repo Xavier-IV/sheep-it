@@ -2,7 +2,7 @@
 name: sheep:milestone
 description: Create a GitHub Milestone
 allowed-tools:
-  - Bash
+  - Bash(gh api repos/:owner/:repo/milestones *)
 ---
 
 <objective>

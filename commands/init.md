@@ -2,7 +2,15 @@
 name: sheep:init
 description: Initialize new project (private by default) or setup Sheep It in existing repo
 allowed-tools:
-  - Bash
+  - Bash(gh auth status)
+  - Bash(gh project list *)
+  - Bash(gh project create *)
+  - Bash(gh repo view *)
+  - Bash(gh repo create *)
+  - Bash(git init)
+  - Bash(git add *)
+  - Bash(git commit *)
+  - Bash(mkdir *)
   - Write
   - Read
 ---
@@ -30,6 +38,32 @@ gh auth status
 ```
 
 If not authenticated, tell user to run `gh auth login` first.
+</step>
+
+<step name="verify-permissions">
+**Check for required GitHub permissions:**
+
+Try to list projects to verify project permissions:
+```bash
+gh project list --limit 1 2>&1
+```
+
+If you see an error like `HTTP 403: Resource not accessible` or `does not have the required scope`, the user needs to add project permissions.
+
+**If permissions are missing, guide user:**
+
+```
+⚠️  Missing GitHub Project permissions!
+
+Sheep It uses GitHub Projects to manage your board.
+Run this command to add the required permissions:
+
+  gh auth refresh -h github.com -s project,read:project
+
+Then run /sheep:init again.
+```
+
+Wait for user to confirm they've added permissions before continuing.
 </step>
 
 <step name="parse-args">

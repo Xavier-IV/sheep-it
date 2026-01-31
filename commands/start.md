@@ -2,7 +2,12 @@
 name: sheep:start
 description: Start working on an issue - create branch, assign, move to In Progress
 allowed-tools:
-  - Bash
+  - Bash(gh issue view *)
+  - Bash(gh issue edit *)
+  - Bash(git checkout *)
+  - Bash(git switch *)
+  - Bash(git branch *)
+  - Bash(git push *)
 ---
 
 <objective>

@@ -2,7 +2,10 @@
 name: sheep:board
 description: View and manage GitHub Project board
 allowed-tools:
-  - Bash
+  - Bash(gh project list *)
+  - Bash(gh project view *)
+  - Bash(gh project item-list *)
+  - Bash(gh project create *)
 ---
 
 <objective>

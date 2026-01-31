@@ -29,6 +29,10 @@ rm -rf sheep-it
 **Prerequisites:**
 - [Claude Code](https://claude.ai/code) installed
 - [GitHub CLI](https://cli.github.com/) installed and authenticated (`gh auth login`)
+- GitHub Project permissions (required for board features):
+  ```bash
+  gh auth refresh -h github.com -s project,read:project
+  ```
 
 ---
 

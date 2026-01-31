@@ -2,7 +2,11 @@
 name: sheep:it
 description: 🐑 Ship it! Create PR for current work
 allowed-tools:
-  - Bash
+  - Bash(gh issue view *)
+  - Bash(gh pr create *)
+  - Bash(git push *)
+  - Bash(git status)
+  - Bash(git branch *)
 ---
 
 <objective>

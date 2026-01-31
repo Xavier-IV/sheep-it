@@ -25,6 +25,12 @@ Show all available Sheep It commands and usage.
 
 "Herd your tasks, not markdown files"
 
+Prerequisites:
+  1. Install GitHub CLI: https://cli.github.com
+  2. Authenticate: gh auth login
+  3. Add project permissions:
+     gh auth refresh -h github.com -s project,read:project
+
 Commands:
 
   Setup

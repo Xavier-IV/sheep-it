@@ -2,7 +2,7 @@
 name: sheep:milestones
 description: List all GitHub Milestones with progress
 allowed-tools:
-  - Bash
+  - Bash(gh api repos/:owner/:repo/milestones *)
 ---
 
 <objective>

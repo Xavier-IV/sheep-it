@@ -33,6 +33,22 @@ fi
 
 echo "✓ GitHub CLI authenticated"
 
+# Check for project permissions
+echo "✓ Checking GitHub Project permissions..."
+if ! gh project list --limit 1 &> /dev/null; then
+    echo ""
+    echo "⚠️  Missing GitHub Project permissions!"
+    echo ""
+    echo "Sheep It needs project access to manage your board."
+    echo "Run this command to add permissions:"
+    echo ""
+    echo "  gh auth refresh -h github.com -s project,read:project"
+    echo ""
+    echo "Then run this installer again."
+    exit 1
+fi
+echo "✓ GitHub Project permissions OK"
+
 # Create commands directory if it doesn't exist
 mkdir -p "$HOME/.claude/commands"
 
