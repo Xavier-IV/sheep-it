@@ -5,6 +5,7 @@ allowed-tools:
   - Bash(gh auth status)
   - Bash(gh project list *)
   - Bash(gh project create *)
+  - Bash(gh project link *)
   - Bash(gh repo view *)
   - Bash(gh repo create *)
   - Bash(git init)
@@ -132,11 +133,17 @@ If `--public` was used, show warning first:
 </step>
 
 <step name="create-board">
-**Create GitHub Project board:**
+**Create GitHub Project board and link to repo:**
 
 ```bash
-# Create project
+# Create project and capture the project number
 gh project create --owner @me --title "<project-name>" --format json
+```
+
+Then link the repo to the project:
+```bash
+# Get the project number from the create output, then link
+gh project link <project-number> --owner @me --repo <owner>/<repo-name>
 ```
 
 Note: The project board columns (Backlog, In Progress, Review, Done) are created by default in GitHub Projects v2.
