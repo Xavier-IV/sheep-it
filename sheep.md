@@ -17,16 +17,23 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 
 | Command | Description |
 |---------|-------------|
-| `/sheep:init` | Initialize new project or setup Sheep It in existing repo |
-| `/sheep:task` | Create a GitHub Issue |
+| `/sheep:init` | Initialize new project (private by default) + create board |
+| `/sheep:task` | Create a GitHub Issue (auto-adds to board) |
 | `/sheep:tasks` | List open issues |
 | `/sheep:milestone` | Create a milestone |
 | `/sheep:milestones` | List milestones with progress |
 | `/sheep:progress` | Show milestone progress |
-| `/sheep:start` | Start working on an issue (create branch, assign) |
-| `/sheep:it` | Create PR for current work |
+| `/sheep:board` | View/manage GitHub Project board |
+| `/sheep:start` | Start working on an issue (branch + move to In Progress) |
+| `/sheep:it` | 🐑 Ship it! Create PR (move to Review) |
 | `/sheep:release` | Create GitHub release |
 | `/sheep:help` | Show this help |
+
+## Defaults
+
+- **Private by default**: New repos are private. Use `--public` explicitly for open source.
+- **Board included**: `/sheep:init` creates a GitHub Project board automatically.
+- **Auto card movement**: Cards move through columns as you work.
 
 ## Core Principles
 
@@ -34,6 +41,7 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 2. **Use `gh` CLI** - All operations go through GitHub CLI
 3. **Keep it simple** - Minimal config, maximum leverage of GitHub features
 4. **Audit trail for free** - Git history + GitHub activity = full traceability
+5. **Safe defaults** - Private repos, explicit public
 
 ## GitHub Feature Mapping
 
@@ -42,5 +50,14 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 | Task | Issue |
 | Milestone | Milestone |
 | Progress | Milestone % complete |
-| Board | GitHub Projects |
+| Board | GitHub Projects (Kanban) |
 | Release | GitHub Releases |
+
+## Board Automation
+
+```
+/sheep:task     →  Card in Backlog
+/sheep:start    →  Move to In Progress
+/sheep:it       →  Move to Review
+PR merged       →  Move to Done ✓
+```

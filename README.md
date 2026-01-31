@@ -25,16 +25,17 @@ Sheep It is a Claude Code skill that leverages GitHub's native features (Issues,
 
 ```bash
 /sheep:init                   # Initialize Sheep It in current repo
-/sheep:init "project-name"    # Create new GitHub repo + init
-/sheep:init --private         # Create as private repo
+/sheep:init "project-name"    # Create new private repo + board
+/sheep:init "name" --public   # Create public repo (explicit)
 ```
 
+**Private by default** - to avoid accidental exposure. Use `--public` explicitly for open source.
+
 **What `/sheep:init` does:**
-1. Creates GitHub repo (if new project)
-2. Sets up GitHub Project board with columns
-3. Creates initial milestones (optional)
-4. Adds `.sheep.yml` config
-5. You're ready to herd! 🐑
+1. Creates GitHub repo (private by default)
+2. Sets up GitHub Project board (Backlog → In Progress → Review → Done)
+3. Pushes initial commit
+4. You're ready to herd! 🐑
 
 ### Task Management
 
@@ -203,22 +204,23 @@ claude skill link ./sheep-it
 ## MVP Scope
 
 ### Phase 1: Core Commands
-- [ ] `/sheep:init` - Create repo + setup project
-- [ ] `/sheep:task` - Create issue
+- [ ] `/sheep:init` - Create private repo + project board
+- [ ] `/sheep:task` - Create issue (→ Backlog)
 - [ ] `/sheep:tasks` - List issues
 - [ ] `/sheep:milestone` - Create milestone
 - [ ] `/sheep:milestones` - List milestones
 - [ ] `/sheep:progress` - Show progress
-- [ ] `/sheep:start` - Start working (branch + assign)
-- [ ] `/sheep:it` - Create PR
+- [ ] `/sheep:board` - View project board
+- [ ] `/sheep:start` - Start working (branch + → In Progress)
+- [ ] `/sheep:it` - Create PR (→ Review)
 - [ ] `/sheep:release` - Create GitHub release
 
-### Phase 2: Project Board
-- [ ] `/sheep:board` - Setup/open project board
-- [ ] Auto-move cards on status change
-- [ ] Column configuration
+### Phase 2: Board Automation
+- [ ] Auto-move cards when PR merged (→ Done)
+- [ ] Custom column configuration
+- [ ] Sprint/iteration support
 
-### Phase 3: Releases & Polish
+### Phase 3: Polish
 - [ ] Auto-generate changelog from merged PRs
 - [ ] Tag management
 - [ ] Rich progress visualization
