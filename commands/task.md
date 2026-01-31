@@ -3,8 +3,10 @@ name: sheep:task
 description: Create a GitHub Issue
 allowed-tools:
   - Bash(gh issue create *)
+  - Bash(gh issue list *)
   - Bash(gh label list *)
   - Bash(gh api repos/:owner/:repo/milestones *)
+  - Bash(gh search issues *)
   - AskUserQuestion
 ---
 
@@ -71,6 +73,32 @@ Options (multiSelect: true):
 - "Subscription management"
 - "Webhook handling"
 ```
+</step>
+
+<step name="find-related">
+**Look for related context:**
+
+Search for similar or related issues/PRs:
+```bash
+gh search issues "login" --repo :owner/:repo --limit 5
+gh issue list --label "auth" --state all --limit 5
+```
+
+If related issues found:
+```
+I found some related issues:
+  • #15 Add OAuth login (closed) - might have useful patterns
+  • #18 Password reset (open) - related feature
+
+[AskUserQuestion]
+Question: "Want to link or reference these?"
+Header: "Related"
+Options:
+- "Reference #15 in description" - description: "Add 'Related to #15'"
+- "No references needed (Recommended)" - description: "Standalone issue"
+```
+
+This helps build context and avoid duplicate work.
 </step>
 
 <step name="categorize">

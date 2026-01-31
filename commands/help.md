@@ -11,7 +11,6 @@ Show all available Sheep It commands and usage.
 <usage>
 ```
 /sheep:help                    # Show all commands
-/sheep:help init               # Show help for specific command
 ```
 </usage>
 
@@ -31,45 +30,80 @@ Prerequisites:
   3. Add project permissions:
      gh auth refresh -h github.com -s project,read:project
 
-Commands:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Setup
-    /sheep:init [name]         Create new project (private by default)
-    /sheep:init name --public  Create public repo (explicit)
+SETUP
+  /sheep:init [name]           Create/setup project (private by default)
+  /sheep:config                Configure project settings
 
-  Tasks
-    /sheep:task "title"        Create GitHub Issue → Backlog
-    /sheep:tasks               List open issues
-    /sheep:start <issue>       Start work → In Progress
-    /sheep:it [issue]          🐑 Ship it! Create PR → Review
+PLANNING (Interactive brainstorming)
+  /sheep:task "title"          Brainstorm → refine → create issue
+  /sheep:milestone "v1.0"      Create milestone with due date
 
-  Board
-    /sheep:board               View project board status
-    /sheep:board --open        Open board in browser
+WORKING
+  /sheep:start [issue]         Pick issue → implement → commit
+  /sheep:resume                Continue after context reset
+  /sheep:status                Quick "where am I?" check
+  /sheep:verify [issue]        Verify against acceptance criteria
 
-  Milestones
-    /sheep:milestone "name"    Create a milestone
-    /sheep:milestones          List all milestones
-    /sheep:progress [name]     Show progress
+SHIPPING
+  /sheep:it [issue]            🐑 Ship it! Create PR
+  /sheep:release <version>     Create GitHub release
 
-  Releases
-    /sheep:release <version>   Create GitHub release
+TRACKING
+  /sheep:tasks                 List open issues
+  /sheep:milestones            List milestones with progress
+  /sheep:progress [milestone]  Detailed progress view
+  /sheep:board                 View project board
 
-  Help
-    /sheep:help [command]      Show help
+COLLABORATION
+  /sheep:review [PR]           Review a pull request
 
-Board Flow:
+HELP
+  /sheep:help                  Show this help
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TYPICAL WORKFLOW
+
+  ┌─────────────────────────────────────────────────────┐
+  │  /sheep:task "Add login"                            │
+  │      ↓ Brainstorm & create detailed issue           │
+  │  /sheep:start 22                                    │
+  │      ↓ Branch, assign, IMPLEMENT the code           │
+  │      ↓ Auto-updates issue checkboxes                │
+  │  /sheep:verify 22                                   │
+  │      ↓ Check all acceptance criteria met            │
+  │  /sheep:it 22                                       │
+  │      ↓ Create PR, link to issue                     │
+  │  [PR merged → issue auto-closes]                    │
+  │  /sheep:release v1.0.0                              │
+  │      ↓ Tag, release, close milestone                │
+  └─────────────────────────────────────────────────────┘
+
+BOARD FLOW
   ┌──────────┐   ┌─────────────┐   ┌────────┐   ┌──────┐
   │ Backlog  │ → │ In Progress │ → │ Review │ → │ Done │
   └──────────┘   └─────────────┘   └────────┘   └──────┘
      task           start             it         merged
 
-Examples:
-  /sheep:init "my-app"              # New private repo + board
-  /sheep:task "Add login" --milestone v1.0.0
-  /sheep:start 1                    # Branch + assign
-  /sheep:it 1                       # Create PR
-  /sheep:release v1.0.0             # Release!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+KEY FEATURES
+  • Interactive questions for all decisions
+  • /sheep:start WRITES CODE, not just creates branch
+  • Auto-updates issue checkboxes as you complete them
+  • Posts progress comments on issues
+  • /sheep:resume picks up after context resets
+  • All context saved in GitHub - run /clear anytime
+
+PHILOSOPHY
+  • GitHub IS the source of truth
+  • Issues ARE the PRD
+  • No duplicate state in markdown files
+  • Ship incrementally, verify against spec
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Docs: https://github.com/Xavier-IV/sheep-it
 

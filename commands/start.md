@@ -5,6 +5,7 @@ allowed-tools:
   - Bash(gh issue view *)
   - Bash(gh issue edit *)
   - Bash(gh issue list *)
+  - Bash(gh issue comment *)
   - Bash(git checkout *)
   - Bash(git switch *)
   - Bash(git branch *)
@@ -82,6 +83,17 @@ git checkout -b feature/22-studio-working-hours
 gh issue edit 22 --add-assignee @me
 gh issue edit 22 --add-label "in progress" 2>/dev/null || true
 ```
+
+**Post progress comment:**
+
+```bash
+gh issue comment 22 --body "🐑 Started working on this issue
+
+Branch: \`feature/22-studio-working-hours\`
+Assigned to: @me
+
+Will update acceptance criteria as I progress."
+```
 </step>
 
 <step name="understand-codebase">
@@ -151,6 +163,16 @@ This is the core work. Based on the issue spec:
    git add <files>
    git commit -m "feat(working-hours): add model and migration"
    ```
+
+5. **Update issue checkboxes as you complete criteria:**
+   - When an acceptance criterion is done, update the issue body
+   - Change `- [ ]` to `- [x]` for completed items
+   ```bash
+   # Get current body, update checkbox, patch issue
+   gh issue edit 22 --body "updated body with checked item"
+   ```
+
+   This keeps the issue as live documentation of progress!
 
 5. **Run checks after implementation:**
    - Build the project
