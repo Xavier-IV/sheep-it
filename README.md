@@ -4,356 +4,197 @@
 
 > "Herd your tasks, not markdown files"
 
-Sheep It is a Claude Code skill that leverages GitHub's native features (Issues, Milestones, Projects, PRs) instead of local markdown files. Everything lives in GitHub - the single source of truth.
+Sheep It turns GitHub Issues into your PRD. Create tasks through interactive brainstorming, then let Claude implement them - with auto-updating checkboxes, progress comments, and seamless git workflow.
 
 ## Installation
 
-**One-liner:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/install.sh | bash
 ```
 
-**Or manual:**
-```bash
-# Clone the repo
-git clone https://github.com/Xavier-IV/sheep-it.git
-
-# Copy commands to Claude Code
-mkdir -p ~/.claude/commands/sheep
-cp sheep-it/commands/*.md ~/.claude/commands/sheep/
-
-# Cleanup
-rm -rf sheep-it
-```
-
 **Prerequisites:**
 - [Claude Code](https://claude.ai/code) installed
-- [GitHub CLI](https://cli.github.com/) installed and authenticated (`gh auth login`)
-- GitHub Project permissions (required for board features):
+- [GitHub CLI](https://cli.github.com/) installed and authenticated
+- GitHub Project permissions:
   ```bash
+  gh auth login
   gh auth refresh -h github.com -s project,read:project
   ```
 
 ---
 
-## Quick Start (First Time)
+## Quick Start
 
-**Already have a project on GitHub?**
 ```bash
-cd your-project
-/sheep:init              # Just sets up project board
-```
+# Setup in existing repo
+/sheep:init
 
-**Starting fresh?**
-```bash
-/sheep:init "my-app"     # Creates private repo + board
-```
-
-That's it! Now you can start working.
-
----
-
-## Day-to-Day Workflow
-
-Here's what your typical day looks like with Sheep It:
-
-### Morning: Check what needs doing
-```bash
-/sheep:progress          # See all milestones and tasks
-/sheep:tasks             # List open tasks
-```
-
-### Pick a task and start working
-```bash
-/sheep:start 22          # Creates branch, assigns to you
-                         # → Card moves to "In Progress"
-```
-
-### Code, commit, repeat...
-```bash
-# Just your normal coding workflow
-git add .
-git commit -m "feat: add login form"
-```
-
-### Done? Ship it!
-```bash
-/sheep:it 22             # Creates PR linked to issue #22
-                         # → Card moves to "Review"
-```
-
-### After PR merged
-```bash
-# Issue auto-closes, card moves to "Done" ✓
-# Ready for next task!
-/sheep:start 23
-```
-
-### End of milestone? Release it
-```bash
-/sheep:release v1.0.0    # Creates GitHub release
-                         # → Milestone closes
+# Or create new project
+/sheep:init "my-app"
 ```
 
 ---
 
-## Visual Flow
+## The Workflow
 
+### 1. Create a Task (Interactive Brainstorming)
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         YOUR DAY                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   /sheep:progress      "What needs doing?"                      │
-│         ↓                                                       │
-│   /sheep:start 22      "I'll work on this"                      │
-│         ↓              → creates branch                         │
-│                        → assigns to you                         │
-│      [CODE]            → moves card to In Progress              │
-│         ↓                                                       │
-│   /sheep:it 22         "Done! Ship it 🐑"                       │
-│         ↓              → creates PR                             │
-│                        → moves card to Review                   │
-│    [PR MERGED]                                                  │
-│         ↓              → issue auto-closes                      │
-│                        → card moves to Done ✓                   │
-│                                                                 │
-│   Repeat for next task...                                       │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+/sheep:task "Add user login"
+```
+Claude asks clarifying questions, helps define scope, and creates a well-structured GitHub Issue with acceptance criteria.
 
-Board View:
-┌──────────┐   ┌─────────────┐   ┌────────┐   ┌──────┐
-│ Backlog  │ → │ In Progress │ → │ Review │ → │ Done │
-├──────────┤   ├─────────────┤   ├────────┤   ├──────┤
-│ #24      │   │ #22 ← you   │   │ PR #45 │   │ ✓#21 │
-│ #25      │   │             │   │        │   │ ✓#20 │
-└──────────┘   └─────────────┘   └────────┘   └──────┘
-   task           start             it         merged
+### 2. Start Working (Actually Implements Code!)
 ```
+/sheep:start 22
+```
+- Creates branch `feature/22-add-login`
+- Reads the issue as the spec
+- **Actually writes the code**
+- Auto-checks acceptance criteria as completed
+- Posts progress comments on the issue
+
+### 3. Verify & Sync
+```
+/sheep:verify 22    # Check all acceptance criteria met
+/sheep:sync         # Rebase on latest main
+```
+
+### 4. Ship It!
+```
+/sheep:it 22
+```
+Creates PR linked to issue. When merged, issue auto-closes.
+
+### 5. Release
+```
+/sheep:release v1.0.0
+```
+Creates GitHub release, closes milestone.
 
 ---
-
-## Why Sheep It?
-
-| Traditional (GSD) | Sheep It |
-|-------------------|----------|
-| `.planning/` markdown files | GitHub Issues |
-| Local milestone docs | GitHub Milestones |
-| Phase plans in folders | GitHub Projects board |
-| Todo lists in files | GitHub Issue checkboxes |
-| Manual state tracking | GitHub PR/Issue status |
-| Audit trail in markdown | Git history + GitHub activity |
-
-**The insight:** GitHub already has all the infrastructure. Why duplicate it in markdown?
 
 ## Commands
 
-### Project Setup
+| Command | Description |
+|---------|-------------|
+| **Setup** | |
+| `/sheep:init [name]` | Create/setup project (private by default) |
+| `/sheep:config` | Configure project settings (`.sheeprc.yml`) |
+| **Planning** | |
+| `/sheep:task "title"` | Brainstorm → refine → create issue |
+| `/sheep:milestone "v1.0"` | Create milestone with due date |
+| **Working** | |
+| `/sheep:start [issue]` | Pick issue → **implement** → commit |
+| `/sheep:resume` | Continue after context reset |
+| `/sheep:status` | Quick "where am I?" check |
+| `/sheep:verify [issue]` | Verify against acceptance criteria |
+| `/sheep:sync` | Sync branch with main (rebase/merge) |
+| **Shipping** | |
+| `/sheep:it [issue]` | 🐑 Ship it! Create PR |
+| `/sheep:release <version>` | Create GitHub release |
+| **Tracking** | |
+| `/sheep:tasks` | List open issues |
+| `/sheep:milestones` | List milestones with progress |
+| `/sheep:progress` | Detailed progress view |
+| `/sheep:board` | View project board |
+| **Collaboration** | |
+| `/sheep:review [PR]` | Review a pull request |
+| `/sheep:help` | Show all commands |
 
-```bash
-/sheep:init                   # Initialize Sheep It in current repo
-/sheep:init "project-name"    # Create new private repo + board
-/sheep:init "name" --public   # Create public repo (explicit)
-```
+---
 
-**Private by default** - to avoid accidental exposure. Use `--public` explicitly for open source.
+## Key Features
 
-**What `/sheep:init` does:**
-1. Creates GitHub repo (private by default)
-2. Sets up GitHub Project board (Backlog → In Progress → Review → Done)
-3. Pushes initial commit
-4. You're ready to herd! 🐑
-
-### Task Management
-
-```bash
-/sheep:task "title"          # Create GitHub Issue
-/sheep:tasks                  # List open issues
-/sheep:start 22               # Start working on issue #22
-/sheep:done 22                # Close issue #22
-```
-
-### Milestone Planning
-
-```bash
-/sheep:milestone "v1.4.0"     # Create milestone
-/sheep:milestones             # List all milestones
-/sheep:plan 22 --milestone v1.4.0  # Assign issue to milestone
-```
-
-### Progress Tracking
-
-```bash
-/sheep:progress               # Show all milestone progress
-/sheep:progress v1.4.0        # Show specific milestone
-/sheep:board                  # Open GitHub Projects board
-```
-
-### Shipping
-
-```bash
-/sheep:it                   # Create PR for current branch
-/sheep:it 22                # Create PR linked to issue #22
-/sheep:release v1.4.0         # Create GitHub release
-```
-
-### Quick Actions
-
-```bash
-/sheep:label 22 bug           # Add label to issue
-/sheep:assign 22 @me          # Assign issue to yourself
-/sheep:comment 22 "message"   # Add comment to issue
-```
-
-## Workflow Example
-
-```bash
-# 1. Plan your milestone
-> /sheep:milestone "v1.4.0" --description "Studio improvements"
-
-# 2. Create tasks
-> /sheep:task "Studio Working Hours Integration"
-Created issue #22
-
-> /sheep:task "Attendance Tracking"
-Created issue #23
-
-# 3. Assign to milestone
-> /sheep:plan 22 23 --milestone v1.4.0
-
-# 4. Check progress
-> /sheep:progress v1.4.0
-🐑 v1.4.0 - Studio improvements
-   Progress: ████░░░░░░ 1/3 (33%)
-
-   ✅ #22 Studio Working Hours (closed)
-   🚧 #23 Attendance Tracking (in progress)
-   ⏳ #24 Live Duration (open)
-
-# 5. Start working
-> /sheep:start 23
-Created branch: feature/23-attendance-tracking
-Moved to "In Progress" on project board
-
-# 6. Ship it
-> /sheep:it 23
-Created PR #45 → linked to issue #23
-Ready for review!
-
-# 7. Release when milestone complete
-> /sheep:release v1.4.0
-🚀 Released v1.4.0!
-   - #22 Studio Working Hours
-   - #23 Attendance Tracking
-   - #24 Live Duration
-```
-
-## GitHub Mapping
-
-| Sheep It Concept | GitHub Feature |
-|------------------|----------------|
-| Task | Issue |
-| Milestone | Milestone |
-| Phase/Sprint | Project Board Column |
-| Progress | Milestone % + Issue counts |
-| Plan | Issue body + checkboxes |
-| Audit trail | Git commits + Issue timeline |
-| Release notes | Auto-generated from merged PRs |
-
-## Project Board Integration
-
-Sheep It can auto-manage a GitHub Project board:
+### 🧠 Interactive Brainstorming
+`/sheep:task` doesn't just create issues - it has a conversation to refine your idea:
 
 ```
-┌─────────────┬─────────────┬─────────────┬─────────────┐
-│   Backlog   │ In Progress │   Review    │    Done     │
-├─────────────┼─────────────┼─────────────┼─────────────┤
-│ #25 Live    │ #23 Attend  │ #45 PR      │ #22 Hours   │
-│ #26 Freelan │             │             │             │
-│             │             │             │             │
-└─────────────┴─────────────┴─────────────┴─────────────┘
+> /sheep:task "Add payments"
+
+┌─────────────────────────────────────────┐
+│ Payment type?              [Type]       │
+│ ● Subscription (Recommended)            │
+│ ○ One-time purchase                     │
+│ ○ Both                                  │
+└─────────────────────────────────────────┘
 ```
 
-Commands auto-move cards:
-- `/sheep:start 25` → Backlog → In Progress
-- `/sheep:it 25` → In Progress → Review
-- PR merged → Review → Done
+### 💻 Actually Writes Code
+`/sheep:start` doesn't just create a branch - it implements the feature:
+- Reads issue as the spec
+- Explores codebase for patterns
+- Writes code, commits incrementally
+- Auto-updates issue checkboxes
 
-## Configuration
-
-```yaml
-# .sheep.yml (optional - can also auto-detect)
-github:
-  owner: Xavier-IV
-  repo: com.hoaperfumes.sales
-
-project:
-  board: "Sheep It Board"  # GitHub Project name
-  columns:
-    backlog: "Backlog"
-    in_progress: "In Progress"
-    review: "Review"
-    done: "Done"
-
-defaults:
-  labels:
-    task: ["enhancement"]
-    bug: ["bug"]
-  branch_prefix: "feature/"
+### ✅ Auto-Update Issues
+As you complete acceptance criteria, the issue checkboxes get checked automatically:
+```
+## Acceptance Criteria
+- [x] User can enter email and password ← auto-checked!
+- [x] Invalid credentials show error
+- [ ] Redirect to dashboard (in progress)
 ```
 
-## Installation
-
-```bash
-# Add to Claude Code skills
-claude skill add sheep-it
-
-# Or clone and link
-git clone https://github.com/you/sheep-it
-claude skill link ./sheep-it
+### 🔄 Resume After Context Reset
 ```
+/sheep:resume
+```
+Picks up where you left off by reading git state and issue progress.
+
+### 🔀 Smart Conflict Handling
+```
+/sheep:sync
+```
+Rebases on main and walks you through conflicts interactively.
+
+---
+
+## Board Flow
+
+```
+Backlog        In Progress      Review         Done
+─────────      ───────────      ──────         ────
+#24 Feature    #22 Login ←you   PR #45         ✓#21
+#25 Bug fix                                    ✓#20
+    │               │              │              │
+    └── /task ──────┴── /start ────┴── /it ──────┴── merged
+```
+
+---
 
 ## Philosophy
 
-1. **GitHub is the source of truth** - No duplicate state in markdown
-2. **Use what exists** - Issues, Milestones, Projects are battle-tested
-3. **Audit trail for free** - Git history + GitHub activity
-4. **Collaborative by default** - Team can see everything in GitHub
-5. **Scriptable** - `gh` CLI underneath, extend as needed
+| Traditional Approach | Sheep It |
+|---------------------|----------|
+| `.planning/` markdown files | GitHub Issues |
+| Local milestone docs | GitHub Milestones |
+| Phase plans in folders | GitHub Projects board |
+| Todo lists in files | Issue checkboxes (auto-updated!) |
+| Manual state tracking | Git + GitHub status |
+| Context lost on reset | `/sheep:resume` recovers |
 
-## Tech Stack
+**The insight:** GitHub already has all the infrastructure. The issue body IS the PRD.
 
-- **Claude Code Skill** - The interface
-- **GitHub CLI (`gh`)** - All GitHub operations
-- **GitHub API** - For advanced queries
-- **Git** - Branch management
+---
 
-## MVP Scope
+## Configuration (Optional)
 
-### Phase 1: Core Commands
-- [ ] `/sheep:init` - Create private repo + project board
-- [ ] `/sheep:task` - Create issue (→ Backlog)
-- [ ] `/sheep:tasks` - List issues
-- [ ] `/sheep:milestone` - Create milestone
-- [ ] `/sheep:milestones` - List milestones
-- [ ] `/sheep:progress` - Show progress
-- [ ] `/sheep:board` - View project board
-- [ ] `/sheep:start` - Start working (branch + → In Progress)
-- [ ] `/sheep:it` - Create PR (→ Review)
-- [ ] `/sheep:release` - Create GitHub release
+Create `.sheeprc.yml` in your project:
 
-### Phase 2: Board Automation
-- [ ] Auto-move cards when PR merged (→ Done)
-- [ ] Custom column configuration
-- [ ] Sprint/iteration support
+```yaml
+branch:
+  prefix: "feature"
+  format: "{prefix}/{issue}-{slug}"
 
-### Phase 3: Polish
-- [ ] Auto-generate changelog from merged PRs
-- [ ] Tag management
-- [ ] Rich progress visualization
-- [ ] Team/assignment features
-- [ ] `/sheep:help` - Show all commands
+commits:
+  style: "conventional"  # feat:, fix:, chore:
+
+auto_update:
+  check_criteria: true   # Auto-check acceptance criteria
+  progress_comments: true
+```
+
+Or run `/sheep:config` for interactive setup.
 
 ---
 
