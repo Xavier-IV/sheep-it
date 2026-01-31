@@ -6,6 +6,30 @@
 
 Sheep It is a Claude Code skill that leverages GitHub's native features (Issues, Milestones, Projects, PRs) instead of local markdown files. Everything lives in GitHub - the single source of truth.
 
+## Installation
+
+**One-liner:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/install.sh | bash
+```
+
+**Or manual:**
+```bash
+# Clone the repo
+git clone https://github.com/Xavier-IV/sheep-it.git
+
+# Copy commands to Claude Code
+mkdir -p ~/.claude/commands/sheep
+cp sheep-it/commands/*.md ~/.claude/commands/sheep/
+
+# Cleanup
+rm -rf sheep-it
+```
+
+**Prerequisites:**
+- [Claude Code](https://claude.ai/code) installed
+- [GitHub CLI](https://cli.github.com/) installed and authenticated (`gh auth login`)
+
 ## Why Sheep It?
 
 | Traditional (GSD) | Sheep It |
