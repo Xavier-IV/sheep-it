@@ -233,12 +233,31 @@ DO NOT just print questions as text. USE the AskUserQuestion tool:
 This creates the nice interactive UI with selectable options.
 
 Guidelines:
+- Mark recommended options with "(Recommended)" to reduce decision friction
+- Put recommended option FIRST in the list
 - Acknowledge each answer before asking next question
 - Summarize understanding periodically
 - 3-5 questions total is usually enough
 - If user gives detailed initial description, skip redundant questions
 - Can ask up to 4 questions in one AskUserQuestion call
 - Use multiSelect: true when multiple options can apply
+
+Example with recommendation:
+```json
+{
+  "questions": [{
+    "question": "Which payment provider?",
+    "header": "Provider",
+    "options": [
+      {"label": "Stripe (Recommended)", "description": "Most popular, great docs, easy setup"},
+      {"label": "Paddle", "description": "Handles tax/VAT automatically"},
+      {"label": "PayPal", "description": "Widely recognized"},
+      {"label": "Not sure yet", "description": "We can decide later"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
 </interaction-style>
 
 <examples>
