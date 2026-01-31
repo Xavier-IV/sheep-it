@@ -45,6 +45,7 @@ WORKING
   /sheep:resume                Continue after context reset
   /sheep:status                Quick "where am I?" check
   /sheep:verify [issue]        Verify against acceptance criteria
+  /sheep:sync                  Sync branch with main (rebase/merge)
 
 SHIPPING
   /sheep:it [issue]            🐑 Ship it! Create PR
@@ -74,6 +75,8 @@ TYPICAL WORKFLOW
   │      ↓ Auto-updates issue checkboxes                │
   │  /sheep:verify 22                                   │
   │      ↓ Check all acceptance criteria met            │
+  │  /sheep:sync                                        │
+  │      ↓ Rebase on latest main (if needed)            │
   │  /sheep:it 22                                       │
   │      ↓ Create PR, link to issue                     │
   │  [PR merged → issue auto-closes]                    │

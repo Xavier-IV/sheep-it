@@ -6,10 +6,12 @@ allowed-tools:
   - Bash(gh issue list *)
   - Bash(gh pr create *)
   - Bash(git push *)
+  - Bash(git fetch *)
   - Bash(git status)
   - Bash(git branch *)
   - Bash(git log *)
   - Bash(git diff *)
+  - Bash(git rev-list *)
   - AskUserQuestion
 ---
 
@@ -45,6 +47,34 @@ Options:
 - "Create a new branch first" - description: "I'll help you branch off"
 - "Cancel" - description: "I'll sort this out myself"
 ```
+</step>
+
+<step name="check-outdated">
+**Check if branch is behind main:**
+
+```bash
+git fetch origin
+git rev-list --count HEAD..origin/main
+```
+
+If behind main (count > 0):
+```
+⚠️  Your branch is 5 commits behind main.
+
+Recent merges may cause conflicts or your PR may be outdated.
+```
+
+```
+[AskUserQuestion]
+Question: "Your branch is behind main. What would you like to do?"
+Header: "Outdated"
+Options:
+- "Sync first (Recommended)" - description: "Run /sheep:sync to rebase"
+- "Create PR anyway" - description: "I'll handle conflicts in the PR"
+- "Cancel" - description: "Let me check first"
+```
+
+If "Sync first" → tell user to run `/sheep:sync` then come back
 </step>
 
 <step name="check-changes">
