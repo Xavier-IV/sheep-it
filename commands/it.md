@@ -179,6 +179,8 @@ gh pr create --draft \
 PR: https://github.com/<owner>/<repo>/pull/45
 
 When merged, issue #22 will auto-close! 🎉
+
+💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 ```
 </step>
 

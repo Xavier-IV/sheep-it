@@ -109,6 +109,8 @@ gh api repos/:owner/:repo/milestones \
 
 Next steps:
   /sheep:task "First task" --milestone v1.4.0
+
+💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 ```
 </step>
 

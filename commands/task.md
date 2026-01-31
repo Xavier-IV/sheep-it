@@ -204,6 +204,8 @@ EOF
    → Added to Backlog
 
 🚀 Ready to start? Run: /sheep:start 22
+
+💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 ```
 </step>
 

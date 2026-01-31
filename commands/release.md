@@ -198,6 +198,8 @@ Included:
 🚀 https://github.com/<owner>/<repo>/releases/tag/v1.4.0
 
 Congratulations on shipping! 🎉
+
+💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 ```
 </step>
 

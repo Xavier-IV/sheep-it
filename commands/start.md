@@ -113,6 +113,8 @@ gh issue edit 22 --add-label "in progress" 2>/dev/null || true
 
 Ready to code! When done:
   /sheep:it 22
+
+💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 ```
 </step>
 

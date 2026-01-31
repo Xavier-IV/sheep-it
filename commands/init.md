@@ -176,6 +176,8 @@ Route to selected commands in order: milestone first, then task.
 🎉 Ready to herd!
    Repo:  https://github.com/<owner>/<project-name>
    Board: https://github.com/users/<owner>/projects/<number>
+
+💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 ```
 </step>
 
