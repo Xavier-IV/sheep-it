@@ -1,96 +1,81 @@
 # 🐑 Sheep It
 
-**GitHub-native project flow for Claude Code**
+**Your GitHub Issues become PRDs. Claude implements them.**
 
-> "Herd your tasks, not markdown files"
+Stop managing `.planning/` folders and markdown files. Sheep It uses GitHub Issues as your spec, then Claude actually writes the code. One command to brainstorm, one to implement, one to ship.
 
-Sheep It turns GitHub Issues into your PRD. Create tasks through interactive brainstorming, then let Claude implement them - with auto-updating checkboxes, progress comments, and seamless git workflow.
-
-## Installation
+## 30-Second Install
 
 ```bash
+# 1. Install Sheep It
 curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/install.sh | bash
-```
 
-**Prerequisites:**
-- [Claude Code](https://claude.ai/code) installed
-- [GitHub CLI](https://cli.github.com/) installed and authenticated
-- GitHub Project permissions:
-  ```bash
-  gh auth login
-  gh auth refresh -h github.com -s project,read:project
-  ```
+# 2. Authenticate GitHub (if not already)
+gh auth login && gh auth refresh -h github.com -s project,read:project
 
----
-
-## Quick Start
-
-```bash
-# Setup in existing repo
+# 3. Setup in your project
 /sheep:init
-
-# Or create new project
-/sheep:init "my-app"
 ```
 
----
+Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.github.com/).
 
-## The Workflow
+## See It In Action
 
-### 1. Create a Task (Interactive Brainstorming)
+### Step 1: Brainstorm a task
 ```
 /sheep:task "Add user login"
 ```
-Claude asks clarifying questions, helps define scope, and creates a well-structured GitHub Issue with acceptance criteria.
+Claude asks clarifying questions, refines scope, and creates a GitHub Issue with acceptance criteria. **The issue IS your PRD.**
 
-### 2. Start Working (Actually Implements Code!)
+### Step 2: Claude implements it
 ```
 /sheep:start 22
 ```
-- Creates branch `feature/22-add-login`
-- Reads the issue as the spec
-- **Actually writes the code**
-- Auto-checks acceptance criteria as completed
-- Posts progress comments on the issue
+Claude reads the issue as the spec, writes the code, commits incrementally, and auto-checks acceptance criteria as it completes them.
 
-### 3. Verify & Sync
-```
-/sheep:verify 22    # Check all acceptance criteria met
-/sheep:sync         # Rebase on latest main
-```
-
-### 4. Ship It!
+### Step 3: Ship it
 ```
 /sheep:it 22
 ```
-Creates PR linked to issue. When merged, issue auto-closes.
+Creates a PR linked to the issue. When merged, issue auto-closes. Done.
 
-### 5. Release
-```
-/sheep:release v1.0.0
-```
-Creates GitHub release, closes milestone.
+## What Makes This Different
+
+| Approach | How it works | The catch |
+|----------|--------------|-----------|
+| **Plain gh CLI** | Manual issue creation, manual branch management | No AI assistance, you write everything |
+| **GSD** | Detailed planning phases in `.planning/` folders | Heavy process, context lost on reset |
+| **Sheep It** | GitHub Issues = PRD, Claude implements | Just works. Issues persist, context recovers. |
+
+**Why GitHub Issues?**
+- They survive Claude context resets (your spec is always there)
+- Built-in tracking: checkboxes, labels, milestones, projects
+- `/sheep:resume` recovers state instantly by reading git + issues
+- No markdown file sprawl to manage
 
 ---
 
 ## Commands
 
+<details>
+<summary><strong>All Commands Reference</strong></summary>
+
 | Command | Description |
 |---------|-------------|
 | **Setup** | |
 | `/sheep:init [name]` | Create/setup project (private by default) |
-| `/sheep:config` | Configure project settings (`.sheeprc.yml`) |
+| `/sheep:config` | Configure project settings |
 | **Planning** | |
 | `/sheep:task "title"` | Brainstorm → refine → create issue |
 | `/sheep:milestone "v1.0"` | Create milestone with due date |
 | **Working** | |
-| `/sheep:start [issue]` | Pick issue → **implement** → commit |
+| `/sheep:start [issue]` | Pick issue → implement → commit |
 | `/sheep:resume` | Continue after context reset |
 | `/sheep:status` | Quick "where am I?" check |
 | `/sheep:verify [issue]` | Verify against acceptance criteria |
 | `/sheep:sync` | Sync branch with main (rebase/merge) |
 | **Shipping** | |
-| `/sheep:it [issue]` | 🐑 Ship it! Create PR |
+| `/sheep:it [issue]` | Ship it! Create PR |
 | `/sheep:release <version>` | Create GitHub release |
 | **Tracking** | |
 | `/sheep:tasks` | List open issues |
@@ -101,85 +86,11 @@ Creates GitHub release, closes milestone.
 | `/sheep:review [PR]` | Review a pull request |
 | `/sheep:help` | Show all commands |
 
----
-
-## Key Features
-
-### 🧠 Interactive Brainstorming
-`/sheep:task` doesn't just create issues - it has a conversation to refine your idea:
-
-```
-> /sheep:task "Add payments"
-
-┌─────────────────────────────────────────┐
-│ Payment type?              [Type]       │
-│ ● Subscription (Recommended)            │
-│ ○ One-time purchase                     │
-│ ○ Both                                  │
-└─────────────────────────────────────────┘
-```
-
-### 💻 Actually Writes Code
-`/sheep:start` doesn't just create a branch - it implements the feature:
-- Reads issue as the spec
-- Explores codebase for patterns
-- Writes code, commits incrementally
-- Auto-updates issue checkboxes
-
-### ✅ Auto-Update Issues
-As you complete acceptance criteria, the issue checkboxes get checked automatically:
-```
-## Acceptance Criteria
-- [x] User can enter email and password ← auto-checked!
-- [x] Invalid credentials show error
-- [ ] Redirect to dashboard (in progress)
-```
-
-### 🔄 Resume After Context Reset
-```
-/sheep:resume
-```
-Picks up where you left off by reading git state and issue progress.
-
-### 🔀 Smart Conflict Handling
-```
-/sheep:sync
-```
-Rebases on main and walks you through conflicts interactively.
-
----
-
-## Board Flow
-
-```
-Backlog        In Progress      Review         Done
-─────────      ───────────      ──────         ────
-#24 Feature    #22 Login ←you   PR #45         ✓#21
-#25 Bug fix                                    ✓#20
-    │               │              │              │
-    └── /task ──────┴── /start ────┴── /it ──────┴── merged
-```
-
----
-
-## Philosophy
-
-| Traditional Approach | Sheep It |
-|---------------------|----------|
-| `.planning/` markdown files | GitHub Issues |
-| Local milestone docs | GitHub Milestones |
-| Phase plans in folders | GitHub Projects board |
-| Todo lists in files | Issue checkboxes (auto-updated!) |
-| Manual state tracking | Git + GitHub status |
-| Context lost on reset | `/sheep:resume` recovers |
-
-**The insight:** GitHub already has all the infrastructure. The issue body IS the PRD.
-
----
+</details>
 
 ## Configuration (Optional)
 
-Create `.sheeprc.yml` in your project:
+Create `.sheeprc.yml` or run `/sheep:config`:
 
 ```yaml
 branch:
@@ -194,14 +105,21 @@ auto_update:
   progress_comments: true
 ```
 
-Or run `/sheep:config` for interactive setup.
+## Philosophy
+
+| Traditional | Sheep It |
+|-------------|----------|
+| `.planning/` markdown files | GitHub Issues |
+| Local milestone docs | GitHub Milestones |
+| Phase plans in folders | GitHub Projects board |
+| Todo lists in files | Issue checkboxes (auto-updated!) |
+| Manual state tracking | Git + GitHub status |
+| Context lost on reset | `/sheep:resume` recovers |
+
+**The insight:** GitHub already has all the infrastructure. Why rebuild it?
 
 ---
 
-## License
-
-MIT
-
----
+MIT License
 
 *🐑 Don't be sheepish, ship it!*
