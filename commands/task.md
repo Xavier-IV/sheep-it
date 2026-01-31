@@ -240,7 +240,9 @@ Guidelines:
 - 3-5 questions total is usually enough
 - If user gives detailed initial description, skip redundant questions
 - Can ask up to 4 questions in one AskUserQuestion call
-- Use multiSelect: true when multiple options can apply
+- Use multiSelect: true when multiple options can apply (checkboxes, not radio buttons)
+  - Good for: subtask selection, feature toggles, "select all that apply"
+  - Bad for: single choices like "create/cancel", "yes/no"
 
 Example with recommendation:
 ```json

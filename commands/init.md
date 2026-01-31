@@ -147,20 +147,20 @@ gh project link <project-number> --owner @me --repo <owner>/<repo-name>
 </step>
 
 <step name="next-steps">
-**Ask about next steps:**
+**Ask about next steps (multiSelect):**
 
 ```
-[AskUserQuestion]
-Question: "What would you like to do next?"
-Header: "Next"
+[AskUserQuestion with multiSelect: true]
+Question: "What would you like to set up? (select all that apply)"
+Header: "Next steps"
 Options:
 - "Create first milestone (Recommended)" - description: "Plan your first release"
-- "Create first task" - description: "Jump straight into work"
+- "Create first task" - description: "Add something to your backlog"
 - "I'm done for now" - description: "Exit setup"
 ```
 
-If milestone: route to `/sheep:milestone`
-If task: route to `/sheep:task`
+User can select both milestone AND task, or just one, or skip.
+Route to selected commands in order: milestone first, then task.
 </step>
 
 <step name="confirm">
@@ -187,4 +187,5 @@ If task: route to `/sheep:task`
 - Always confirm before creating resources
 - Offer helpful next steps at the end
 - Mark "(Recommended)" on sensible defaults
+- Use multiSelect: true when user can pick multiple options (e.g., next steps)
 </interaction-style>

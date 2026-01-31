@@ -64,15 +64,18 @@ Options:
 - "Cancel" - description: "Finish the issues first"
 ```
 
-If "Show me":
+If "Show me the issues":
 ```
-⏳ #27 Final testing
-⏳ #28 Documentation
-
-These issues will remain open after release.
+[AskUserQuestion with multiSelect: true]
+Question: "These issues are still open. Include them in the release anyway?"
+Header: "Open issues"
+Options:
+- "#27 Final testing" - description: "Will remain open"
+- "#28 Documentation" - description: "Will remain open"
+- "Release without these" - description: "Exclude from release notes"
 ```
 
-Then ask again.
+User can select which open issues to mention in release notes, or exclude all.
 </step>
 
 <step name="release-type">
