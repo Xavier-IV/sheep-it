@@ -8,6 +8,7 @@ allowed-tools:
   - Bash(git switch *)
   - Bash(git branch *)
   - Bash(git push *)
+  - AskUserQuestion
 ---
 
 <objective>

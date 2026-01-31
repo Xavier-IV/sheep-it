@@ -3,6 +3,7 @@ name: sheep:milestone
 description: Create a GitHub Milestone
 allowed-tools:
   - Bash(gh api repos/:owner/:repo/milestones *)
+  - AskUserQuestion
 ---
 
 <objective>

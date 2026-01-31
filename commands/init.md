@@ -14,6 +14,7 @@ allowed-tools:
   - Bash(mkdir *)
   - Write
   - Read
+  - AskUserQuestion
 ---
 
 <objective>

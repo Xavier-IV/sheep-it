@@ -9,8 +9,8 @@ allowed-tools:
 ---
 
 <objective>
-Brainstorm and refine a task before creating a well-structured GitHub Issue.
-Don't just accept the title - help the user think through what they actually need.
+Brainstorm and refine a task through interactive conversation before creating a well-structured GitHub Issue.
+Use AskUserQuestion tool for all clarifications - make it feel like a collaborative session.
 </objective>
 
 <usage>
@@ -23,102 +23,118 @@ Don't just accept the title - help the user think through what they actually nee
 <process>
 
 <step name="understand">
-**Understand the task:**
+**Understand the task (use AskUserQuestion):**
 
-Start with the user's initial idea and ask clarifying questions:
+Start by acknowledging the idea, then ask clarifying questions using AskUserQuestion tool.
 
-1. **What problem does this solve?**
-   - Why is this needed?
-   - What's broken or missing?
+Example flow:
+```
+User: /sheep:task "Add payments"
 
-2. **Who is this for?**
-   - End user? Admin? Developer?
-   - What's their goal?
+You: Got it - adding payments. Let me understand what you need.
 
-3. **What does success look like?**
-   - How will we know it's done?
-   - What can the user do after this is shipped?
+[Use AskUserQuestion with questions like:]
+- "What type of payment?" with options: One-time purchase, Subscription, Both, Other
+- "Payment provider preference?" with options: Stripe (Recommended), Paddle, PayPal, Not sure yet
+```
 
-Keep it conversational - 2-3 questions at a time, not an interrogation.
+Ask 1-2 questions at a time using AskUserQuestion. Keep it conversational.
+
+Key questions to cover (adapt based on context):
+1. **What type of task?** - Feature, Bug fix, Improvement, Chore
+2. **What problem does this solve?** - Free text or suggest common problems
+3. **Who is this for?** - End user, Admin, Developer, etc.
+4. **Scope check** - Is this small, medium, or large?
 </step>
 
 <step name="refine">
-**Refine the scope:**
+**Refine scope (use AskUserQuestion if needed):**
 
-Based on answers, help clarify:
+If the task seems big, use AskUserQuestion to confirm:
 
-1. **Is this one task or multiple?**
-   - If it's too big, suggest breaking it down
-   - "This sounds like 3 separate tasks: X, Y, Z. Want to create them separately?"
+```
+[AskUserQuestion]
+Question: "This sounds like a bigger feature. Want to break it down?"
+Options:
+- "Yes, break into smaller tasks"
+- "No, keep as one task"
+- "Let me explain more"
+```
 
-2. **What's in scope vs out of scope?**
-   - Help define boundaries
-   - "So we're doing X but NOT Y, correct?"
+If breaking down:
+```
+[AskUserQuestion]
+Question: "I see these subtasks - which ones do you want?"
+Options (multiSelect: true):
+- "Setup Stripe integration"
+- "Checkout flow UI"
+- "Subscription management"
+- "Webhook handling"
+```
+</step>
 
-3. **Any dependencies?**
-   - Does this need something else first?
-   - "This needs the auth system - is that already done?"
+<step name="categorize">
+**Categorize (use AskUserQuestion):**
+
+Fetch available labels and milestones, then ask:
+
+```bash
+gh label list --json name --jq '.[].name'
+gh api repos/:owner/:repo/milestones --jq '.[].title'
+```
+
+```
+[AskUserQuestion]
+Question: "What type of task is this?"
+Options:
+- "enhancement" (new feature)
+- "bug" (something broken)
+- "chore" (maintenance/cleanup)
+- "documentation"
+```
+
+```
+[AskUserQuestion]
+Question: "Assign to a milestone?"
+Options:
+- "v1.0.0"
+- "v1.1.0"
+- "No milestone"
+```
 </step>
 
 <step name="structure">
 **Structure the issue:**
 
-Build out the issue content:
+Based on conversation, build:
 
 1. **Title** - Clear, actionable (verb + noun)
    - ❌ "Login stuff"
    - ✅ "Add email/password login for customers"
 
-2. **Description** - Context and user story
-   ```
+2. **Body** with sections:
+   ```markdown
    ## Why
-   [Problem this solves]
+   [Problem this solves - from conversation]
 
-   ## User Story
-   As a [who], I want to [what], so that [why].
-   ```
+   ## What
+   [Brief description of the solution]
 
-3. **Acceptance Criteria** - Checkboxes for "done"
-   ```
    ## Acceptance Criteria
-   - [ ] User can enter email and password
-   - [ ] Invalid credentials show error message
-   - [ ] Successful login redirects to dashboard
+   - [ ] Criterion 1
+   - [ ] Criterion 2
+   - [ ] Criterion 3
+
+   ## Tasks (if complex)
+   - [ ] Subtask 1
+   - [ ] Subtask 2
    ```
-
-4. **Subtasks** (if complex)
-   ```
-   ## Tasks
-   - [ ] Create login form component
-   - [ ] Add authentication endpoint
-   - [ ] Handle session/token storage
-   ```
-</step>
-
-<step name="categorize">
-**Suggest categorization:**
-
-Based on the discussion, suggest:
-
-1. **Labels** - Show available labels and recommend
-   ```bash
-   gh label list
-   ```
-   - bug, enhancement, documentation, etc.
-
-2. **Milestone** - If relevant
-   ```bash
-   gh api repos/:owner/:repo/milestones --jq '.[].title'
-   ```
-
-3. **Priority/Size** - If you have those labels
-   - "This seems like a medium-sized task"
 </step>
 
 <step name="preview">
-**Preview before creating:**
+**Preview and confirm (use AskUserQuestion):**
 
-Show the full issue as it will appear:
+Show the full issue preview:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -129,25 +145,26 @@ Labels: enhancement
 Milestone: v1.0.0
 
 ## Why
-Customers currently can't access their accounts.
+Customers need to access their order history.
 
-## User Story
-As a customer, I want to log in with my email and password,
-so that I can view my order history.
+## What
+Add a login form with email/password authentication.
 
 ## Acceptance Criteria
-- [ ] User can enter email and password
-- [ ] Invalid credentials show error message
-- [ ] Successful login redirects to dashboard
-- [ ] "Forgot password" link is visible
-
-## Tasks
-- [ ] Create login form component
-- [ ] Add POST /auth/login endpoint
-- [ ] Store JWT in httpOnly cookie
+- [ ] Login form with email and password fields
+- [ ] Error message for invalid credentials
+- [ ] Redirect to dashboard on success
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-Create this issue? (Yes / Edit / Cancel)
+Then use AskUserQuestion:
+```
+[AskUserQuestion]
+Question: "Create this issue?"
+Options:
+- "Yes, create it"
+- "Edit something first"
+- "Cancel"
 ```
 </step>
 
@@ -159,22 +176,15 @@ gh issue create \
   --title "Add email/password login for customers" \
   --body "$(cat <<'EOF'
 ## Why
-Customers currently can't access their accounts.
+Customers need to access their order history.
 
-## User Story
-As a customer, I want to log in with my email and password,
-so that I can view my order history.
+## What
+Add a login form with email/password authentication.
 
 ## Acceptance Criteria
-- [ ] User can enter email and password
-- [ ] Invalid credentials show error message
-- [ ] Successful login redirects to dashboard
-- [ ] "Forgot password" link is visible
-
-## Tasks
-- [ ] Create login form component
-- [ ] Add POST /auth/login endpoint
-- [ ] Store JWT in httpOnly cookie
+- [ ] Login form with email and password fields
+- [ ] Error message for invalid credentials
+- [ ] Redirect to dashboard on success
 EOF
 )" \
   --label "enhancement" \
@@ -191,77 +201,103 @@ EOF
 
    Labels: enhancement
    Milestone: v1.0.0
-
    → Added to Backlog
 
-Ready to start? Run: /sheep:start 22
+🚀 Ready to start? Run: /sheep:start 22
 ```
 </step>
 
 </process>
 
-<guidelines>
-- Be conversational, not robotic
-- Ask 2-3 questions at a time, not a wall of questions
-- If user gives short answers, that's fine - don't force detail
-- Help them think, don't interrogate
-- Suggest structure but let them override
-- Always preview before creating
-- A well-defined task saves hours of confusion later
-</guidelines>
+<interaction-style>
+CRITICAL: Always use AskUserQuestion tool for choices and clarifications.
+
+DO NOT just print questions as text. USE the AskUserQuestion tool:
+
+```json
+{
+  "questions": [{
+    "question": "What type of task is this?",
+    "header": "Task type",
+    "options": [
+      {"label": "Feature", "description": "New functionality"},
+      {"label": "Bug fix", "description": "Something is broken"},
+      {"label": "Improvement", "description": "Enhance existing feature"},
+      {"label": "Chore", "description": "Maintenance or cleanup"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+This creates the nice interactive UI with selectable options.
+
+Guidelines:
+- Acknowledge each answer before asking next question
+- Summarize understanding periodically
+- 3-5 questions total is usually enough
+- If user gives detailed initial description, skip redundant questions
+- Can ask up to 4 questions in one AskUserQuestion call
+- Use multiSelect: true when multiple options can apply
+</interaction-style>
 
 <examples>
 
-**Quick task (user knows what they want):**
+**Example 1: Simple bug**
 ```
-> /sheep:task "Fix: login button not working on mobile"
+User: /sheep:task "Login button broken"
 
-Sounds like a bug fix. Quick questions:
-- What happens when they tap it? (nothing, error, wrong page?)
-- Which mobile browser/device?
+Claude: Got it - sounds like a bug. Let me get a few details.
 
-> Nothing happens, iOS Safari
+[AskUserQuestion]
+- "What happens when you click it?" → Nothing / Error message / Wrong page / Other
+- "Which browser/device?" → Chrome / Safari / Mobile / All
 
-Got it. Here's what I'm thinking:
+User selects: "Nothing" and "Mobile"
 
-Title: Fix: login button unresponsive on iOS Safari
+Claude: Thanks! Here's what I'm thinking:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 PREVIEW
+
+Title: Fix: Login button unresponsive on mobile
 Labels: bug
 
 ## Problem
-Login button doesn't respond to taps on iOS Safari.
+Login button doesn't respond to taps on mobile devices.
 
 ## Acceptance Criteria
-- [ ] Login button works on iOS Safari
-- [ ] Tested on iPhone 12+ and iPad
+- [ ] Login button works on mobile browsers
+- [ ] Tested on iOS Safari and Chrome Android
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Create this issue?
+[AskUserQuestion: "Create this issue?" → Yes / Edit / Cancel]
 ```
 
-**Complex feature (needs refinement):**
+**Example 2: Big feature (needs breakdown)**
 ```
-> /sheep:task "Add payments"
+User: /sheep:task "Add payments"
 
-Payments is a big topic! Let's narrow it down:
-- What are users paying for? (subscription, one-time, both?)
-- What payment methods? (card, PayPal, bank transfer?)
+Claude: Payments is a big topic! Let me understand what you need.
 
-> Just credit card for monthly subscription
+[AskUserQuestion]
+- "Payment type?" → One-time / Subscription / Both
+- "Provider?" → Stripe (Recommended) / Paddle / PayPal / Not sure
 
-Makes sense. A few more:
-- Which payment provider? (Stripe, Paddle, etc.)
-- Does the user need to manage their subscription? (cancel, change plan?)
+User: Subscription, Stripe
 
-> Stripe. Yes they need to cancel/change
+Claude: Got it - Stripe subscriptions. This is actually a few tasks:
 
-This is actually 3-4 tasks. Want to break it down?
-1. Stripe integration setup
-2. Subscription checkout flow
-3. Customer portal (manage/cancel)
-4. Webhook handling (payment events)
+[AskUserQuestion with multiSelect: true]
+"Which parts do you want to tackle?"
+- Setup Stripe integration
+- Subscription checkout flow
+- Customer portal (manage/cancel)
+- Webhook handling
 
-> Yeah break it down
+User selects: All of them
 
-I'll create 4 linked issues. Starting with #1...
+Claude: I'll create 4 linked issues. Let's start with the first one...
 ```
 
 </examples>

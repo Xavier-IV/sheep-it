@@ -7,6 +7,7 @@ allowed-tools:
   - Bash(gh release create *)
   - Bash(git tag *)
   - Bash(git push *)
+  - AskUserQuestion
 ---
 
 <objective>
