@@ -21,6 +21,21 @@ Sheep It is a Claude Code skill that leverages GitHub's native features (Issues,
 
 ## Commands
 
+### Project Setup
+
+```bash
+/sheep:init                   # Initialize Sheep It in current repo
+/sheep:init "project-name"    # Create new GitHub repo + init
+/sheep:init --private         # Create as private repo
+```
+
+**What `/sheep:init` does:**
+1. Creates GitHub repo (if new project)
+2. Sets up GitHub Project board with columns
+3. Creates initial milestones (optional)
+4. Adds `.sheep.yml` config
+5. You're ready to herd! 🐑
+
 ### Task Management
 
 ```bash
@@ -188,27 +203,27 @@ claude skill link ./sheep-it
 ## MVP Scope
 
 ### Phase 1: Core Commands
+- [ ] `/sheep:init` - Create repo + setup project
 - [ ] `/sheep:task` - Create issue
 - [ ] `/sheep:tasks` - List issues
 - [ ] `/sheep:milestone` - Create milestone
+- [ ] `/sheep:milestones` - List milestones
 - [ ] `/sheep:progress` - Show progress
 - [ ] `/sheep:start` - Start working (branch + assign)
 - [ ] `/sheep:ship` - Create PR
+- [ ] `/sheep:release` - Create GitHub release
 
 ### Phase 2: Project Board
 - [ ] `/sheep:board` - Setup/open project board
 - [ ] Auto-move cards on status change
 - [ ] Column configuration
 
-### Phase 3: Releases
-- [ ] `/sheep:release` - Create release
-- [ ] Auto-generate changelog from PRs
+### Phase 3: Releases & Polish
+- [ ] Auto-generate changelog from merged PRs
 - [ ] Tag management
-
-### Phase 4: Polish
-- [ ] `/sheep:init` - Setup wizard
 - [ ] Rich progress visualization
 - [ ] Team/assignment features
+- [ ] `/sheep:help` - Show all commands
 
 ---
 
