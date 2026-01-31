@@ -64,8 +64,8 @@ Sheep It is a Claude Code skill that leverages GitHub's native features (Issues,
 ### Shipping
 
 ```bash
-/sheep:ship                   # Create PR for current branch
-/sheep:ship 22                # Create PR linked to issue #22
+/sheep:it                   # Create PR for current branch
+/sheep:it 22                # Create PR linked to issue #22
 /sheep:release v1.4.0         # Create GitHub release
 ```
 
@@ -108,7 +108,7 @@ Created branch: feature/23-attendance-tracking
 Moved to "In Progress" on project board
 
 # 6. Ship it
-> /sheep:ship 23
+> /sheep:it 23
 Created PR #45 → linked to issue #23
 Ready for review!
 
@@ -148,7 +148,7 @@ Sheep It can auto-manage a GitHub Project board:
 
 Commands auto-move cards:
 - `/sheep:start 25` → Backlog → In Progress
-- `/sheep:ship 25` → In Progress → Review
+- `/sheep:it 25` → In Progress → Review
 - PR merged → Review → Done
 
 ## Configuration
@@ -210,7 +210,7 @@ claude skill link ./sheep-it
 - [ ] `/sheep:milestones` - List milestones
 - [ ] `/sheep:progress` - Show progress
 - [ ] `/sheep:start` - Start working (branch + assign)
-- [ ] `/sheep:ship` - Create PR
+- [ ] `/sheep:it` - Create PR
 - [ ] `/sheep:release` - Create GitHub release
 
 ### Phase 2: Project Board

@@ -23,7 +23,7 @@ Commands:
     /sheep:task "title"        Create a GitHub Issue
     /sheep:tasks               List open issues
     /sheep:start <issue>       Start working on an issue
-    /sheep:ship [issue]        Create PR for current work
+    /sheep:it [issue]        Create PR for current work
 
   Milestones
     /sheep:milestone "name"    Create a milestone
@@ -40,7 +40,7 @@ Examples:
   /sheep:init "my-app" --private
   /sheep:task "Fix login bug" --label bug
   /sheep:start 22
-  /sheep:ship 22
+  /sheep:it 22
   /sheep:release v1.0.0
 
 Docs: https://github.com/Xavier-IV/sheep-it

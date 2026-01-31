@@ -1,13 +1,13 @@
-# /sheep:ship
+# /sheep:it
 
-Create a Pull Request for current work.
+🐑 Ship it! Create a Pull Request for current work.
 
 ## Usage
 
 ```
-/sheep:ship                    # Create PR for current branch
-/sheep:ship 22                 # Create PR linked to issue #22
-/sheep:ship --draft            # Create as draft PR
+/sheep:it                      # Create PR for current branch
+/sheep:it 22                   # Create PR linked to issue #22
+/sheep:it --draft              # Create as draft PR
 ```
 
 ## Behavior
