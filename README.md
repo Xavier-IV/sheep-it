@@ -2,7 +2,7 @@
 
 **Your GitHub Issues become PRDs. Claude implements them.**
 
-Stop managing `.planning/` folders and markdown files. Sheep It uses GitHub Issues as your spec, then Claude actually writes the code. One command to brainstorm, one to implement, one to ship.
+A simple workflow for solo devs. Sheep It uses GitHub Issues as your spec, then Claude actually writes the code. One command to brainstorm, one to implement, one to ship.
 
 ## 30-Second Install
 
@@ -39,19 +39,17 @@ Claude reads the issue as the spec, writes the code, commits incrementally, and 
 ```
 Creates a PR linked to the issue. When merged, issue auto-closes. Done.
 
-## What Makes This Different
+## Why I Built This
 
-| Approach | How it works | The catch |
-|----------|--------------|-----------|
-| **Plain gh CLI** | Manual issue creation, manual branch management | No AI assistance, you write everything |
-| **GSD** | Detailed planning phases in `.planning/` folders | Heavy process, context lost on reset |
-| **Sheep It** | GitHub Issues = PRD, Claude implements | Just works. Issues persist, context recovers. |
+I'm a solo dev who wanted something simple. I kept losing context when Claude reset, and managing `.planning/` folders felt like overhead for my small projects.
 
-**Why GitHub Issues?**
+GitHub Issues already have everything I need:
 - They survive Claude context resets (your spec is always there)
 - Built-in tracking: checkboxes, labels, milestones, projects
 - `/sheep:resume` recovers state instantly by reading git + issues
-- No markdown file sprawl to manage
+- No extra files to manage
+
+This is just a personal tool I built for myself. If it helps you too, great!
 
 ---
 
@@ -107,16 +105,15 @@ auto_update:
 
 ## Philosophy
 
-| Traditional | Sheep It |
-|-------------|----------|
-| `.planning/` markdown files | GitHub Issues |
-| Local milestone docs | GitHub Milestones |
-| Phase plans in folders | GitHub Projects board |
-| Todo lists in files | Issue checkboxes (auto-updated!) |
-| Manual state tracking | Git + GitHub status |
-| Context lost on reset | `/sheep:resume` recovers |
+GitHub already has all the infrastructure for project management. Sheep It just connects the dots:
 
-**The insight:** GitHub already has all the infrastructure. Why rebuild it?
+- **Issues** → Your PRD / spec
+- **Milestones** → Version planning
+- **Projects** → Kanban board
+- **Checkboxes** → Acceptance criteria (auto-updated!)
+- **Git state** → Progress tracking
+
+Keep it simple. Use what's already there.
 
 ---
 
