@@ -1,15 +1,24 @@
-# /sheep:help
+---
+name: sheep:help
+description: Show all Sheep It commands
+allowed-tools: []
+---
 
-Show all available Sheep It commands.
+<objective>
+Show all available Sheep It commands and usage.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:help                    # Show all commands
 /sheep:help init               # Show help for specific command
 ```
+</usage>
 
-## Output Format
+<process>
+
+<step name="show-help">
+**Display help:**
 
 ```
 🐑 Sheep It - GitHub-native project flow
@@ -52,9 +61,14 @@ Board Flow:
 Examples:
   /sheep:init "my-app"              # New private repo + board
   /sheep:task "Add login" --milestone v1.0.0
-  /sheep:start 1                    # Branch + assign + move card
-  /sheep:it 1                       # PR + move to review
-  /sheep:release v1.0.0
+  /sheep:start 1                    # Branch + assign
+  /sheep:it 1                       # Create PR
+  /sheep:release v1.0.0             # Release!
 
 Docs: https://github.com/Xavier-IV/sheep-it
+
+🐑 Don't be sheepish, ship it!
 ```
+</step>
+
+</process>

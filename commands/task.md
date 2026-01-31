@@ -1,9 +1,16 @@
-# /sheep:task
+---
+name: sheep:task
+description: Create a GitHub Issue
+allowed-tools:
+  - Bash
+---
 
-Create a GitHub Issue.
+<objective>
+Create a GitHub Issue. Optionally assign to milestone and add labels.
+The issue will automatically appear in the project board's Backlog column.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:task "title"                           # Create issue with title
 /sheep:task "title" --body "description"      # With description
@@ -11,14 +18,23 @@ Create a GitHub Issue.
 /sheep:task "title" --milestone v1.0.0        # Assign to milestone
 /sheep:task                                   # Interactive: ask for details
 ```
+</usage>
 
-## Behavior
+<process>
 
-1. **Get issue details**: From args or ask user
-2. **Create issue**: `gh issue create --title "title" [options]`
-3. **Show result**: Issue number and URL
+<step name="get-details">
+**Get issue details:**
 
-## Commands Used
+If title provided in args, use it.
+If no args, ask user:
+1. What's the task title?
+2. Description? (optional)
+3. Label? (optional - show available with `gh label list`)
+4. Milestone? (optional - show available with `gh api repos/:owner/:repo/milestones --jq '.[].title'`)
+</step>
+
+<step name="create-issue">
+**Create the issue:**
 
 ```bash
 # Basic
@@ -40,18 +56,17 @@ gh issue create \
   --label "enhancement" \
   --milestone "v1.4.0"
 ```
+</step>
 
-## Output Format
+<step name="confirm">
+**Show result:**
 
 ```
-🐑 Created task #22: Studio Working Hours
-   https://github.com/user/repo/issues/22
+🐑 Created task #<number>: <title>
+   https://github.com/<owner>/<repo>/issues/<number>
+
+   → Added to Backlog
 ```
+</step>
 
-## Interactive Mode
-
-If just `/sheep:task` is called without arguments, ask:
-1. What's the task title?
-2. Any description? (optional)
-3. Label? (show available labels)
-4. Milestone? (show available milestones)
+</process>

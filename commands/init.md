@@ -1,127 +1,190 @@
-# /sheep:init
+---
+name: sheep:init
+description: Initialize new project (private by default) or setup Sheep It in existing repo
+allowed-tools:
+  - Bash
+  - Write
+  - Read
+---
 
+<objective>
 Initialize a new project with Sheep It or setup Sheep It in an existing repo.
+Creates GitHub repo (private by default) and GitHub Project board.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:init                      # Setup in current repo
 /sheep:init "project-name"       # Create new private repo + setup
-/sheep:init "name" --public      # Create as public repo (explicit)
+/sheep:init "name" --public      # Create public repo (explicit)
+```
+</usage>
+
+<process>
+
+<step name="verify-gh">
+**Verify GitHub CLI is installed and authenticated:**
+
+```bash
+gh auth status
 ```
 
-**Note:** Repos are **private by default** to avoid accidental exposure. Use `--public` explicitly for open source projects.
+If not authenticated, tell user to run `gh auth login` first.
+</step>
 
-## Behavior
+<step name="parse-args">
+**Parse arguments:**
 
-### When in an existing git repo (no project name given):
+- If project name given → create new repo
+- If `--public` flag → create as public (otherwise private)
+- If no args and in git repo → setup in existing repo
+</step>
 
-1. **Verify GitHub CLI**: Run `gh auth status` to ensure authenticated
-2. **Check if repo exists on GitHub**: Run `gh repo view`
-3. **If not on GitHub**: Offer to create it (private by default)
-4. **Create Project board**: Setup GitHub Project with columns
-5. **Setup complete**: Confirm Sheep It is ready
+<step name="create-or-setup">
 
-### When creating a new project (project name given):
+**First, check if repo already exists on GitHub:**
 
-1. **Verify GitHub CLI**: Run `gh auth status`
-2. **Create directory**: `mkdir -p <project-name> && cd <project-name>`
-3. **Initialize git**: `git init`
-4. **Create README**: Basic README.md with project name
-5. **Initial commit**: `git add . && git commit -m "Initial commit"`
-6. **Create GitHub repo**:
-   - Default: `gh repo create <project-name> --private --source=. --push`
-   - Public: `gh repo create <project-name> --public --source=. --push`
-7. **Create Project board**: Setup GitHub Project with Kanban columns
-8. **Confirm success**: Show repo URL and board URL
-
-## GitHub Project Board Setup
-
-Creates a GitHub Project (v2) with these columns:
-
-```
-┌────────────┬──────────────┬────────────┬──────────┐
-│  Backlog   │ In Progress  │   Review   │   Done   │
-└────────────┴──────────────┴────────────┴──────────┘
+```bash
+gh repo view 2>/dev/null
 ```
 
-Commands Used:
+**If repo ALREADY exists on GitHub:**
+- Skip repo creation entirely
+- Just proceed to project board setup
+- Show: "✓ Found existing repo: owner/repo-name"
+
+**If NO repo on GitHub but git repo exists locally:**
+- Ask user if they want to create it on GitHub
+- If yes, create as PRIVATE by default:
+```bash
+gh repo create --private --source=. --push
+```
+
+**If creating brand new project (name provided):**
+
+1. Create directory:
+```bash
+mkdir -p <project-name> && cd <project-name>
+```
+
+2. Initialize git:
+```bash
+git init
+```
+
+3. Create basic README:
+```bash
+echo "# <project-name>" > README.md
+```
+
+4. Initial commit:
+```bash
+git add . && git commit -m "Initial commit"
+```
+
+5. Create GitHub repo (PRIVATE by default):
+```bash
+# Private (default - safe)
+gh repo create <project-name> --private --source=. --push
+
+# Public (only if --public flag)
+gh repo create <project-name> --public --source=. --push
+```
+
+If `--public` was used, show warning first:
+```
+⚠️  Creating PUBLIC repository - code will be visible to everyone.
+```
+</step>
+
+<step name="create-board">
+**Create GitHub Project board:**
+
 ```bash
 # Create project
-gh project create --owner @me --title "project-name"
-
-# The project board will be linked to the repo
-# Issues added via /sheep:task auto-appear in Backlog
+gh project create --owner @me --title "<project-name>" --format json
 ```
 
-## Output Format
+Note: The project board columns (Backlog, In Progress, Review, Done) are created by default in GitHub Projects v2.
+</step>
+
+<step name="confirm">
+**Show success message:**
 
 ```
-🐑 Sheep It - Initializing...
+🐑 Sheep It - Initialized!
 
-✓ GitHub CLI authenticated as @username
-✓ Created repository: username/project-name (private)
+✓ GitHub CLI authenticated as @<username>
+✓ Created repository: <owner>/<project-name> (private)
+✓ Created project board
 ✓ Pushed initial commit
-✓ Created project board: "project-name"
 
 🎉 Ready to herd!
-   Repo:  https://github.com/username/project-name
-   Board: https://github.com/users/username/projects/1
+   Repo:  https://github.com/<owner>/<project-name>
+   Board: https://github.com/users/<owner>/projects/<number>
 
 Next steps:
   /sheep:milestone "v1.0.0"    # Create your first milestone
   /sheep:task "First task"     # Create your first task
   /sheep:board                 # View your project board
 ```
+</step>
 
-## Error Handling
+</process>
 
-- If `gh` not installed: Show install instructions
-- If not authenticated: Run `gh auth login`
-- If repo name taken: Suggest alternative or ask user
-- If not in a git repo and no name given: Ask for project name
+<important>
+- ALWAYS check if repo exists on GitHub FIRST before trying to create
+- NEVER create a repo if one already exists - just setup the board
+- ALWAYS create repos as PRIVATE unless `--public` is explicitly provided
+- This protects users from accidentally exposing code
+- Show a warning when creating public repos
+</important>
 
-## Examples
+<examples>
 
-**New project (private by default):**
-```
-> /sheep:init "my-cool-app"
-
-🐑 Sheep It - Initializing...
-✓ GitHub CLI authenticated as @Xavier-IV
-✓ Created directory: my-cool-app
-✓ Initialized git repository
-✓ Created repository: Xavier-IV/my-cool-app (private)
-✓ Created project board
-✓ Pushed initial commit
-
-🎉 Ready to herd!
-   Repo:  https://github.com/Xavier-IV/my-cool-app
-   Board: https://github.com/users/Xavier-IV/projects/5
-```
-
-**New public project (explicit):**
-```
-> /sheep:init "open-source-lib" --public
-
-⚠️  Creating PUBLIC repository - code will be visible to everyone.
-
-🐑 Sheep It - Initializing...
-✓ Created repository: Xavier-IV/open-source-lib (public)
-✓ Created project board
-...
-```
-
-**Existing repo:**
+**Most common: Existing repo already on GitHub**
 ```
 > /sheep:init
 
 🐑 Sheep It - Initializing...
 ✓ GitHub CLI authenticated as @Xavier-IV
-✓ Found existing repo: Xavier-IV/existing-project
-✓ Created project board: "existing-project"
+✓ Found existing repo: Xavier-IV/my-project
+✓ Created project board
 
 🎉 Ready to herd!
-   Repo:  https://github.com/Xavier-IV/existing-project
+   Repo:  https://github.com/Xavier-IV/my-project
    Board: https://github.com/users/Xavier-IV/projects/5
 ```
+
+**Local git repo not yet on GitHub:**
+```
+> /sheep:init
+
+🐑 Sheep It - Initializing...
+✓ GitHub CLI authenticated as @Xavier-IV
+ℹ️  Local repo not on GitHub yet.
+
+Create GitHub repo? (will be private)
+> Yes
+
+✓ Created repository: Xavier-IV/my-project (private)
+✓ Pushed to GitHub
+✓ Created project board
+
+🎉 Ready to herd!
+```
+
+**New project from scratch:**
+```
+> /sheep:init "my-new-app"
+
+🐑 Sheep It - Initializing...
+✓ Created directory: my-new-app
+✓ Initialized git
+✓ Created repository: Xavier-IV/my-new-app (private)
+✓ Created project board
+
+🎉 Ready to herd!
+```
+
+</examples>

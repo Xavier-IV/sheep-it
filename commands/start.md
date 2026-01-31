@@ -1,55 +1,71 @@
-# /sheep:start
+---
+name: sheep:start
+description: Start working on an issue - create branch, assign, move to In Progress
+allowed-tools:
+  - Bash
+---
 
-Start working on an issue - creates branch and assigns to you.
+<objective>
+Start working on an issue. Creates a branch, assigns to you, and moves card to In Progress.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:start 22                # Start working on issue #22
 /sheep:start 22 --branch fix   # Custom branch prefix
 ```
+</usage>
 
-## Behavior
+<process>
 
-1. **Fetch issue**: Get issue title for branch name
-2. **Create branch**: `feature/<issue>-<slug>`
-3. **Assign issue**: Assign to current user
-4. **Add label**: Add "in progress" label if exists
-
-## Commands Used
+<step name="get-issue">
+**Get issue details:**
 
 ```bash
-# Get issue title for branch name
-gh issue view 22 --json title,number
-
-# Create and checkout branch
-git checkout -b feature/22-studio-working-hours
-
-# Assign to self
-gh issue edit 22 --add-assignee @me
-
-# Add in-progress label (if exists)
-gh issue edit 22 --add-label "in progress"
+gh issue view 22 --json number,title,labels
 ```
+</step>
 
-## Output Format
+<step name="create-branch">
+**Create and checkout branch:**
+
+Convert title to kebab-case slug (max 50 chars):
+- "Studio Working Hours" → `studio-working-hours`
+
+```bash
+git checkout -b feature/22-studio-working-hours
+```
+</step>
+
+<step name="assign">
+**Assign issue to self:**
+
+```bash
+gh issue edit 22 --add-assignee @me
+```
+</step>
+
+<step name="label">
+**Add in-progress label (if exists):**
+
+```bash
+gh issue edit 22 --add-label "in progress" 2>/dev/null || true
+```
+</step>
+
+<step name="confirm">
+**Show result:**
 
 ```
 🐑 Starting work on #22: Studio Working Hours
 
 ✓ Created branch: feature/22-studio-working-hours
-✓ Assigned to @Xavier-IV
+✓ Assigned to @<username>
 ✓ Marked as in progress
 
 Ready to code! When done:
-  /sheep:ship 22
+  /sheep:it 22
 ```
+</step>
 
-## Branch Naming
-
-Converts issue title to kebab-case slug:
-- "Studio Working Hours Integration" → `studio-working-hours-integration`
-- "Fix: Login Bug" → `fix-login-bug`
-- Max 50 chars, truncated if longer
-
-Default format: `feature/<issue-number>-<slug>`
+</process>

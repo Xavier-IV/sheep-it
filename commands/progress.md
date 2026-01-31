@@ -1,35 +1,37 @@
-# /sheep:progress
+---
+name: sheep:progress
+description: Show milestone progress with issue breakdown
+allowed-tools:
+  - Bash
+---
 
+<objective>
 Show detailed progress for a milestone or overall project.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:progress                # Overall project progress
 /sheep:progress v1.4.0         # Specific milestone progress
 ```
+</usage>
 
-## Behavior
+<process>
 
-1. **Fetch milestone(s)**: Via GitHub API
-2. **Fetch issues**: Get all issues in milestone
-3. **Format output**: Progress bar + issue list
-
-## Commands Used
+<step name="fetch">
+**Fetch data:**
 
 ```bash
-# Get milestone details
-gh api repos/:owner/:repo/milestones \
-  --jq '.[] | select(.title == "v1.4.0")'
+# Get all milestones
+gh api repos/:owner/:repo/milestones --jq '.[] | "\(.title)|\(.open_issues)|\(.closed_issues)"'
 
-# Get issues in milestone
-gh issue list --milestone "v1.4.0" --state all \
-  --json number,title,state
+# Get issues for specific milestone
+gh issue list --milestone "v1.4.0" --state all --json number,title,state
 ```
+</step>
 
-## Output Format
-
-### Overall Progress
+<step name="display">
+**Show progress:**
 
 ```
 🐑 Project Progress
@@ -45,30 +47,12 @@ v1.4.0 - Studio improvements
 v1.5.0 - Gamification
 ░░░░░░░░░░ 0% complete (0/1)
 └─ ⏳ #24 Mini Game System
-
-v1.6.0 - Freelance System
-░░░░░░░░░░ 0% complete (0/1)
-└─ ⏳ #26 Freelance Agent System
 ```
 
-### Specific Milestone
+Legend:
+- ✅ = closed
+- 🚧 = in progress (has assignee)
+- ⏳ = open
+</step>
 
-```
-🐑 v1.4.0 - Studio improvements
-   ████████░░ 80% complete
-
-Tasks:
-✅ #22 Studio Working Hours          closed 2 days ago
-✅ #23 Attendance Tracking           closed yesterday
-✅ #25 Live Duration                 closed yesterday
-🚧 #27 Final testing                 in progress
-⏳ #28 Documentation                 open
-
-View: https://github.com/user/repo/milestone/1
-```
-
-## Legend
-
-- ✅ Closed
-- 🚧 In Progress (has assignee or "in progress" label)
-- ⏳ Open
+</process>

@@ -1,81 +1,33 @@
-# /sheep:release
+---
+name: sheep:release
+description: Create GitHub Release for a milestone
+allowed-tools:
+  - Bash
+---
 
-Create a GitHub Release for a milestone.
+<objective>
+Create a GitHub Release for a completed milestone.
+Generates changelog from closed issues and creates git tag.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:release v1.4.0                    # Release milestone v1.4.0
 /sheep:release v1.4.0 --draft            # Create as draft
 /sheep:release v1.4.0 --title "Custom"   # Custom release title
 ```
+</usage>
 
-## Behavior
+<process>
 
-1. **Verify milestone**: Check all issues are closed
-2. **Generate changelog**: From closed issues/PRs
-3. **Create tag**: If not exists
-4. **Create release**: With auto-generated notes
-5. **Close milestone**: Mark as closed
-
-## Commands Used
+<step name="verify">
+**Verify milestone is complete:**
 
 ```bash
-# Check milestone is complete
-gh api repos/:owner/:repo/milestones \
-  --jq '.[] | select(.title == "v1.4.0") | .open_issues'
-
-# Create tag
-git tag v1.4.0
-git push origin v1.4.0
-
-# Get closed issues for changelog
-gh issue list --milestone "v1.4.0" --state closed \
-  --json number,title
-
-# Create release with auto-generated notes
-gh release create v1.4.0 \
-  --title "v1.4.0 - Studio Improvements" \
-  --generate-notes
-
-# Or with custom notes
-gh release create v1.4.0 \
-  --title "v1.4.0 - Studio Improvements" \
-  --notes "$(cat <<'EOF'
-## What's New
-
-- #22 Studio Working Hours
-- #23 Attendance Tracking
-- #25 Live Duration Tracking
-
-**Full Changelog**: https://github.com/user/repo/compare/v1.3.0...v1.4.0
-EOF
-)"
-
-# Close milestone
-gh api repos/:owner/:repo/milestones/1 -X PATCH -f state="closed"
+gh api repos/:owner/:repo/milestones --jq '.[] | select(.title == "v1.4.0") | .open_issues'
 ```
 
-## Output Format
-
-```
-🐑 Releasing v1.4.0 - Studio improvements
-
-Included tasks:
-✅ #22 Studio Working Hours
-✅ #23 Attendance Tracking
-✅ #25 Live Duration Tracking
-
-✓ Created tag: v1.4.0
-✓ Created release: v1.4.0 - Studio improvements
-✓ Closed milestone
-
-🚀 Released! https://github.com/user/repo/releases/tag/v1.4.0
-```
-
-## Pre-release Check
-
-If milestone has open issues:
+If open_issues > 0:
 ```
 🐑 Cannot release v1.4.0
 
@@ -85,3 +37,77 @@ If milestone has open issues:
 
 Complete these tasks first, or use --force to release anyway.
 ```
+</step>
+
+<step name="create-tag">
+**Create and push tag:**
+
+```bash
+git tag v1.4.0
+git push origin v1.4.0
+```
+</step>
+
+<step name="get-issues">
+**Get closed issues for changelog:**
+
+```bash
+gh issue list --milestone "v1.4.0" --state closed --json number,title
+```
+</step>
+
+<step name="create-release">
+**Create GitHub release:**
+
+```bash
+gh release create v1.4.0 \
+  --title "v1.4.0 - Studio improvements" \
+  --generate-notes
+```
+
+Or with custom notes:
+```bash
+gh release create v1.4.0 \
+  --title "v1.4.0 - Studio improvements" \
+  --notes "## What's New
+
+- #22 Studio Working Hours
+- #23 Attendance Tracking
+- #25 Live Duration
+
+**Full Changelog**: https://github.com/<owner>/<repo>/compare/v1.3.0...v1.4.0"
+```
+</step>
+
+<step name="close-milestone">
+**Close the milestone:**
+
+```bash
+# Get milestone number
+milestone_number=$(gh api repos/:owner/:repo/milestones --jq '.[] | select(.title == "v1.4.0") | .number')
+
+# Close it
+gh api repos/:owner/:repo/milestones/$milestone_number -X PATCH -f state="closed"
+```
+</step>
+
+<step name="confirm">
+**Show result:**
+
+```
+🐑 Released v1.4.0 - Studio improvements
+
+Included:
+✅ #22 Studio Working Hours
+✅ #23 Attendance Tracking
+✅ #25 Live Duration
+
+✓ Created tag: v1.4.0
+✓ Created release
+✓ Closed milestone
+
+🚀 https://github.com/<owner>/<repo>/releases/tag/v1.4.0
+```
+</step>
+
+</process>

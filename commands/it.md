@@ -1,73 +1,93 @@
-# /sheep:it
+---
+name: sheep:it
+description: 🐑 Ship it! Create PR for current work
+allowed-tools:
+  - Bash
+---
 
+<objective>
 🐑 Ship it! Create a Pull Request for current work.
+The endgame command - creates PR and links to issue.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:it                      # Create PR for current branch
 /sheep:it 22                   # Create PR linked to issue #22
 /sheep:it --draft              # Create as draft PR
 ```
+</usage>
 
-## Behavior
+<process>
 
-1. **Check branch**: Ensure not on main/master
-2. **Push branch**: Push to origin if not already
-3. **Create PR**: With title and body
-4. **Link issue**: Add "Closes #XX" if issue specified
-
-## Commands Used
+<step name="check-branch">
+**Verify not on main/master:**
 
 ```bash
-# Push current branch
+current_branch=$(git branch --show-current)
+if [ "$current_branch" = "main" ] || [ "$current_branch" = "master" ]; then
+  echo "Cannot create PR from main/master branch"
+  exit 1
+fi
+```
+</step>
+
+<step name="push">
+**Push branch to remote:**
+
+```bash
 git push -u origin HEAD
+```
+</step>
 
-# Create PR (interactive)
-gh pr create
+<step name="get-issue">
+**If issue number provided, get details:**
 
-# Create PR linked to issue
+```bash
+gh issue view 22 --json number,title,labels
+```
+
+Determine prefix from labels:
+- `bug` → `fix:`
+- `enhancement` → `feat:`
+- default → `chore:`
+</step>
+
+<step name="create-pr">
+**Create Pull Request:**
+
+```bash
+# With linked issue
 gh pr create \
   --title "feat: Studio Working Hours (#22)" \
   --body "Closes #22"
 
-# Create draft PR
-gh pr create --draft
+# Draft PR
+gh pr create --draft \
+  --title "feat: Studio Working Hours (#22)" \
+  --body "Closes #22"
 
-# Full example with body
+# Without issue link
 gh pr create \
-  --title "feat: Studio Working Hours" \
-  --body "$(cat <<'EOF'
-## Summary
-- Implemented configurable studio hours
-- Added admin UI for hour management
-
-Closes #22
-EOF
-)"
+  --title "feat: Description" \
+  --body "Description of changes"
 ```
+</step>
 
-## Output Format
+<step name="confirm">
+**Show result:**
 
 ```
-🐑 Shipping #22: Studio Working Hours
+🐑 Shipped #22: Studio Working Hours
 
 ✓ Pushed branch: feature/22-studio-working-hours
-✓ Created PR #45: feat: Studio Working Hours
+✓ Created PR #45: feat: Studio Working Hours (#22)
 ✓ Linked to issue #22
 
-PR: https://github.com/user/repo/pull/45
+PR: https://github.com/<owner>/<repo>/pull/45
 
-When merged, issue #22 will auto-close!
+When merged, issue #22 will auto-close! 🎉
 ```
+</step>
 
-## PR Title Format
-
-If linked to issue:
-- `feat: <issue title> (#<number>)` for enhancements
-- `fix: <issue title> (#<number>)` for bugs
-
-Detects from issue labels:
-- `bug` label → `fix:` prefix
-- `enhancement` label → `feat:` prefix
-- Default → `chore:` prefix
+</process>

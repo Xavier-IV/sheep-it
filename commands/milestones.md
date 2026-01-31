@@ -1,29 +1,35 @@
-# /sheep:milestones
+---
+name: sheep:milestones
+description: List all GitHub Milestones with progress
+allowed-tools:
+  - Bash
+---
 
-List all GitHub Milestones with progress.
+<objective>
+List all GitHub Milestones with their progress.
+</objective>
 
-## Usage
-
+<usage>
 ```
 /sheep:milestones              # List all open milestones
 /sheep:milestones --all        # Include closed milestones
 ```
+</usage>
 
-## Behavior
+<process>
 
-1. **Fetch milestones**: Via GitHub API
-2. **Calculate progress**: open vs closed issues
-3. **Format output**: Show with progress bars
-
-## Commands Used
+<step name="fetch">
+**Fetch milestones:**
 
 ```bash
-# List milestones with issue counts
-gh api repos/:owner/:repo/milestones \
-  --jq '.[] | "\(.title) - \(.open_issues) open, \(.closed_issues) closed"'
+gh api repos/:owner/:repo/milestones --jq '.[] | "\(.title)|\(.description)|\(.open_issues)|\(.closed_issues)|\(.html_url)"'
 ```
+</step>
 
-## Output Format
+<step name="display">
+**Show with progress bars:**
+
+Calculate percentage: closed / (open + closed) * 100
 
 ```
 🐑 Milestones
@@ -40,5 +46,8 @@ v1.6.0 - Freelance Agent System
 ░░░░░░░░░░ 0% (0/1 tasks)
 No due date
 
-View: https://github.com/user/repo/milestones
+View: https://github.com/<owner>/<repo>/milestones
 ```
+</step>
+
+</process>
