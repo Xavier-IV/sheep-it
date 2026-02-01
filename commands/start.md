@@ -156,13 +156,67 @@ This is the core work. Based on the issue spec:
    - Match coding style
    - Use framework generators if available (per CLAUDE.md)
 
-4. **Commit as you go:**
-   - Make atomic commits for each logical change
-   - Use conventional commit messages (feat:, fix:, etc.)
-   ```bash
-   git add <files>
-   git commit -m "feat(working-hours): add model and migration"
+4. **Make atomic commits after each logical change:**
+
+   IMPORTANT: Create commits frequently, after each meaningful unit of work.
+   Each commit should represent a single logical change that could be understood
+   and potentially reverted independently.
+
+   **Commit message format:**
    ```
+   type(#issue): short description
+
+   Detailed explanation of what changed and why.
+   Reference specific files or functions if helpful.
+
+   Acceptance-Criteria: [criterion being addressed]
+   ```
+
+   **Commit types:**
+   - `feat` - New feature or functionality
+   - `fix` - Bug fix
+   - `refactor` - Code change that neither fixes a bug nor adds a feature
+   - `test` - Adding or updating tests
+   - `docs` - Documentation changes
+   - `chore` - Maintenance tasks
+
+   **Example commits:**
+   ```bash
+   git add app/models/working_hour.rb db/migrate/xxx_create_working_hours.rb
+   git commit -m "$(cat <<'EOF'
+   feat(#22): add WorkingHour model and migration
+
+   Created the core model for storing studio working hours.
+   - Added day_of_week, opens_at, closes_at columns
+   - Added belongs_to :studio association
+   - Added uniqueness validation for day per studio
+
+   Acceptance-Criteria: Working hours model exists
+   EOF
+   )"
+   ```
+
+   ```bash
+   git add app/controllers/hours_controller.rb app/views/hours/
+   git commit -m "$(cat <<'EOF'
+   feat(#22): add working hours configuration UI
+
+   Built the interface for configuring studio hours.
+   - Added HoursController with index/update actions
+   - Created form for editing hours per day
+   - Added validation error display
+
+   Acceptance-Criteria: Configuration UI allows editing hours
+   EOF
+   )"
+   ```
+
+   **When to commit:**
+   - After creating a new file/function
+   - After completing a subtask
+   - After fixing an edge case
+   - After adding tests for a feature
+   - Before switching to a different area of the codebase
 
 5. **Update issue checkboxes as you complete criteria:**
    - When an acceptance criterion is done, update the issue body
@@ -174,7 +228,7 @@ This is the core work. Based on the issue spec:
 
    This keeps the issue as live documentation of progress!
 
-5. **Run checks after implementation:**
+6. **Run checks after implementation:**
    - Build the project
    - Run type checks
    - Run tests
