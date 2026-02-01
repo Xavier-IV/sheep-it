@@ -7,6 +7,9 @@ allowed-tools:
   - Bash(gh label list *)
   - Bash(gh api repos/:owner/:repo/milestones *)
   - Bash(gh search issues *)
+  - Glob
+  - Grep
+  - Read
   - AskUserQuestion
 ---
 
@@ -82,44 +85,38 @@ Once you understand the task scope, explore the codebase to identify:
 1. **Dependencies** - What existing code this feature will rely on
 2. **Impact** - What existing code might be affected by these changes (domino effect)
 
-**For Rails projects:**
-```bash
-# Find model associations and dependencies
-grep -r "belongs_to\|has_many\|has_one" app/models/ --include="*.rb"
-
-# Find usages of related models/services
-grep -rn "ClassName" app/ --include="*.rb" | head -20
-
-# Find controller actions that might be affected
-grep -rn "def.*action_name\|@variable_name" app/controllers/ --include="*.rb"
+**Use Glob to find related files by naming patterns:**
+```
+[Glob pattern="app/models/*related*.rb"]
+[Glob pattern="src/components/*Related*"]
+[Glob pattern="**/*FeatureName*"]
 ```
 
-**For Next.js/React projects:**
-```bash
-# Find component imports
-grep -rn "import.*ComponentName" src/ --include="*.tsx" --include="*.ts"
+**Use Grep to search for code patterns:**
 
-# Find API route usages
-grep -rn "fetch.*api/route\|useQuery\|useMutation" src/ --include="*.tsx" --include="*.ts"
-
-# Find shared hooks/utilities being used
-grep -rn "useHookName\|utilityFunction" src/ --include="*.tsx" --include="*.ts"
+For Rails projects:
+```
+[Grep pattern="belongs_to|has_many|has_one" path="app/models/"]
+[Grep pattern="ClassName" path="app/"]
+[Grep pattern="def.*action_name|@variable_name" path="app/controllers/"]
 ```
 
-**For generic codebases:**
-```bash
-# Find file imports/requires
-grep -rn "import\|require" . --include="*.js" --include="*.ts" --include="*.py" | grep "related_term"
-
-# Find function/class usages
-grep -rn "functionName\|ClassName" . --include="*.js" --include="*.ts" --include="*.py"
+For Next.js/React projects:
+```
+[Grep pattern="import.*ComponentName" glob="*.tsx"]
+[Grep pattern="fetch.*api/route|useQuery|useMutation" glob="*.tsx"]
+[Grep pattern="useHookName|utilityFunction" path="src/"]
 ```
 
-**Use Glob to find related files:**
-```bash
-# Find files by naming patterns
-ls -la app/models/*related*.rb
-ls -la src/components/*Related*
+For generic codebases:
+```
+[Grep pattern="import|require.*related_term"]
+[Grep pattern="functionName|ClassName"]
+```
+
+**Use Read to examine key files:**
+```
+[Read file_path="path/to/relevant/file.rb"]
 ```
 
 **Document findings for the issue body:**
