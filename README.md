@@ -117,6 +117,18 @@ Keep it simple. Use what's already there.
 
 ---
 
+## Uninstall
+
+To remove Sheep It from your system:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/uninstall.sh | bash
+```
+
+This removes the `~/.claude/commands/sheep` directory. Your project files and GitHub data are untouched.
+
+---
+
 MIT License
 
 *🐑 Don't be sheepish, ship it!*
