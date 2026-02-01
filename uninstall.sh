@@ -3,11 +3,27 @@
 # 🐑 Sheep It - Uninstall Script
 # Cross-platform uninstaller for macOS, Linux, and Windows (Git Bash/WSL)
 #
-# Usage: curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/uninstall.sh | bash
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/uninstall.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/uninstall.sh | bash -s -- --yes
+#
+# Options:
+#   -y, --yes    Skip confirmation prompt (for non-interactive use)
 
 set -e
 
 SHEEP_DIR="$HOME/.claude/commands/sheep"
+SKIP_CONFIRM=false
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        -y|--yes)
+            SKIP_CONFIRM=true
+            shift
+            ;;
+    esac
+done
 
 # Detect operating system
 detect_os() {
@@ -86,17 +102,35 @@ fi
 
 echo ""
 
-# Confirm before deletion
-read -p "Are you sure you want to uninstall Sheep It? [y/N] " -n 1 -r
-echo ""
+# Confirm before deletion (unless --yes flag is passed)
+if [ "$SKIP_CONFIRM" = false ]; then
+    # Check if we can read from terminal
+    if [ -t 0 ]; then
+        # Running directly (stdin is terminal)
+        read -p "Are you sure you want to uninstall Sheep It? [y/N] " -n 1 -r
+        echo ""
+    elif (exec < /dev/tty) 2>/dev/null; then
+        # Running via curl | bash (stdin is piped, but tty is available)
+        read -p "Are you sure you want to uninstall Sheep It? [y/N] " -n 1 -r < /dev/tty
+        echo ""
+    else
+        # Non-interactive environment (no tty available)
+        echo "⚠️  Cannot prompt for confirmation (no terminal available)."
+        echo ""
+        echo "To uninstall non-interactively, run:"
+        echo "  curl -fsSL https://raw.githubusercontent.com/Xavier-IV/sheep-it/master/uninstall.sh | bash -s -- --yes"
+        echo ""
+        exit 1
+    fi
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo ""
-    echo "Uninstall cancelled. Sheep It remains installed."
-    echo ""
-    echo "🐑 Baaa-ck to work!"
-    echo ""
-    exit 0
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "Uninstall cancelled. Sheep It remains installed."
+        echo ""
+        echo "🐑 Baaa-ck to work!"
+        echo ""
+        exit 0
+    fi
 fi
 
 echo ""
