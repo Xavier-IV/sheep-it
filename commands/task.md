@@ -7,6 +7,9 @@ allowed-tools:
   - Bash(gh label list *)
   - Bash(gh api repos/:owner/:repo/milestones *)
   - Bash(gh search issues *)
+  - Glob
+  - Grep
+  - Read
   - AskUserQuestion
 ---
 
@@ -73,6 +76,55 @@ Options (multiSelect: true):
 - "Subscription management"
 - "Webhook handling"
 ```
+</step>
+
+<step name="analyze-impact">
+**Analyze codebase for dependencies and impact:**
+
+Once you understand the task scope, explore the codebase to identify:
+1. **Dependencies** - What existing code this feature will rely on
+2. **Impact** - What existing code might be affected by these changes (domino effect)
+
+**Use Glob to find related files by naming patterns:**
+```
+[Glob pattern="app/models/*related*.rb"]
+[Glob pattern="src/components/*Related*"]
+[Glob pattern="**/*FeatureName*"]
+```
+
+**Use Grep to search for code patterns:**
+
+For Rails projects:
+```
+[Grep pattern="belongs_to|has_many|has_one" path="app/models/"]
+[Grep pattern="ClassName" path="app/"]
+[Grep pattern="def.*action_name|@variable_name" path="app/controllers/"]
+```
+
+For Next.js/React projects:
+```
+[Grep pattern="import.*ComponentName" glob="*.tsx"]
+[Grep pattern="fetch.*api/route|useQuery|useMutation" glob="*.tsx"]
+[Grep pattern="useHookName|utilityFunction" path="src/"]
+```
+
+For generic codebases:
+```
+[Grep pattern="import|require.*related_term"]
+[Grep pattern="functionName|ClassName"]
+```
+
+**Use Read to examine key files:**
+```
+[Read file_path="path/to/relevant/file.rb"]
+```
+
+**Document findings for the issue body:**
+- List files that will be dependencies (code this feature relies on)
+- List files that may be impacted (code that depends on what you'll change)
+- Note any tests that cover impacted areas
+
+This analysis will be included in the issue body to help AI implementation understand context and verify impacted areas.
 </step>
 
 <step name="find-related">
@@ -148,6 +200,17 @@ Based on conversation, build:
    ## What
    [Brief description of the solution]
 
+   ## Dependencies
+   > This feature relies on:
+   - `path/to/file.rb` - Brief description of dependency
+   - `path/to/service.rb` - What it provides
+
+   ## Impact Analysis
+   > Changes here may affect:
+   - `path/to/controller.rb` - Uses the modified code
+   - `path/to/view.erb` - Displays related data
+   - `spec/path/to/spec.rb` - Existing tests to verify
+
    ## Acceptance Criteria
    - [ ] Criterion 1
    - [ ] Criterion 2
@@ -157,6 +220,9 @@ Based on conversation, build:
    - [ ] Subtask 1
    - [ ] Subtask 2
    ```
+
+**Note:** The Dependencies and Impact Analysis sections come from the `analyze-impact` step.
+If no significant dependencies or impacts were found, these sections can be omitted or marked as "None identified".
 </step>
 
 <step name="preview">
@@ -177,6 +243,17 @@ Customers need to access their order history.
 
 ## What
 Add a login form with email/password authentication.
+
+## Dependencies
+> This feature relies on:
+- `app/models/user.rb` - User model for authentication
+- `app/services/auth_service.rb` - Authentication logic
+
+## Impact Analysis
+> Changes here may affect:
+- `app/controllers/sessions_controller.rb` - Login flow
+- `app/views/layouts/application.html.erb` - Nav login link
+- `spec/features/login_spec.rb` - Existing login tests
 
 ## Acceptance Criteria
 - [ ] Login form with email and password fields
@@ -208,6 +285,17 @@ Customers need to access their order history.
 
 ## What
 Add a login form with email/password authentication.
+
+## Dependencies
+> This feature relies on:
+- `app/models/user.rb` - User model for authentication
+- `app/services/auth_service.rb` - Authentication logic
+
+## Impact Analysis
+> Changes here may affect:
+- `app/controllers/sessions_controller.rb` - Login flow
+- `app/views/layouts/application.html.erb` - Nav login link
+- `spec/features/login_spec.rb` - Existing login tests
 
 ## Acceptance Criteria
 - [ ] Login form with email and password fields
