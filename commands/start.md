@@ -270,14 +270,15 @@ Options:
 ✓ Assigned to @you
 ✓ All acceptance criteria met
 
-Commits:
-  • abc1234 feat(hours): add working hours model
-  • def5678 feat(hours): add configuration UI
-  • ghi9012 test(hours): add model specs
+Atomic commits (traceable to issue):
+  • abc1234 feat(#22): add working hours model
+  • def5678 feat(#22): add configuration UI
+  • ghi9012 test(#22): add model specs
 
 Ready to ship? Run: /sheep:it 22
 
 💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
+💡 Each commit references #22, making history fully traceable.
 ```
 </step>
 
