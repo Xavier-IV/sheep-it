@@ -114,10 +114,10 @@ fail_count=0
 for file in "${COMMAND_FILES[@]}"; do
     if curl -fsSL "${REPO_RAW_URL}/commands/${file}" -o "${SHEEP_DIR}/${file}" 2>/dev/null; then
         echo "  ✓ $file"
-        ((success_count++))
+        success_count=$((success_count + 1))
     else
         echo "  ✗ $file (failed)"
-        ((fail_count++))
+        fail_count=$((fail_count + 1))
     fi
 done
 
