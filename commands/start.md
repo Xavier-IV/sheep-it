@@ -107,6 +107,102 @@ Before implementing, explore the codebase:
 Use the Task tool with Explore agent if needed for complex codebases.
 </step>
 
+<step name="reanalyze-impact">
+**Re-analyze dependencies and impact:**
+
+Even if the issue has Dependencies/Impact Analysis sections, re-verify them:
+- The codebase may have changed since the issue was created
+- Fresh analysis ensures you catch all affected areas
+
+**Parse existing analysis from issue body:**
+Look for "## Dependencies" and "## Impact Analysis" sections in the issue.
+
+**Verify and expand the analysis:**
+
+```bash
+# For each file mentioned in Dependencies, verify it exists and check its current state
+ls -la path/to/dependency.rb
+
+# For each file in Impact Analysis, find current usages
+grep -rn "FunctionOrClassName" app/ --include="*.rb" | head -20
+
+# Search for additional dependencies not in the original analysis
+grep -rn "import\|require\|belongs_to\|has_many" path/to/main_file.rb
+```
+
+**Identify additional impacted areas:**
+
+```bash
+# Find all files that import/use the code you'll modify
+grep -rn "ModuleOrClassName" . --include="*.rb" --include="*.ts" --include="*.tsx" | head -30
+
+# Find tests for impacted areas
+ls -la spec/**/*related*_spec.rb 2>/dev/null || true
+ls -la __tests__/**/*Related*.test.ts 2>/dev/null || true
+```
+
+**Document your findings:**
+```
+Impact Analysis (re-verified):
+- Files this feature depends on: [list]
+- Files that may be affected: [list]
+- Tests to run after implementation: [list]
+```
+</step>
+
+<step name="assess-risk">
+**Assess impact level and warn if high-risk:**
+
+Based on the impact analysis, categorize the change:
+
+**Low Impact:**
+- Isolated change with no downstream dependencies
+- Only affects the new feature files
+- Minimal or no test coverage concerns
+
+**Medium Impact:**
+- 2-5 files may be affected
+- Some existing tests cover impacted areas
+- Changes are additive (not modifying existing behavior)
+
+**High Impact:**
+- 6+ files may be affected
+- Core/shared code being modified
+- Existing behavior is being changed
+- Critical paths (auth, payments, data) involved
+
+**For high-impact changes, show warning:**
+
+```
+⚠️  HIGH IMPACT CHANGE DETECTED
+
+This change affects 8+ files and modifies core functionality.
+
+Files that depend on your changes:
+- app/controllers/bookings_controller.rb
+- app/controllers/studios_controller.rb
+- app/services/availability_service.rb
+- app/views/studios/show.html.erb
+- app/views/bookings/new.html.erb
+- spec/models/studio_spec.rb
+- spec/services/availability_service_spec.rb
+- spec/features/booking_flow_spec.rb
+
+Recommendation: Implement incrementally with frequent commits.
+After implementation, verify each impacted file still works correctly.
+```
+
+```
+[AskUserQuestion]
+Question: "This is a high-impact change. How do you want to proceed?"
+Header: "Risk"
+Options:
+- "Proceed carefully (Recommended)" - description: "Implement with extra verification"
+- "Break into smaller tasks" - description: "Use /sheep:task to split this up"
+- "Continue anyway" - description: "I understand the risks"
+```
+</step>
+
 <step name="confirm-approach">
 **Confirm approach with user:**
 
@@ -260,6 +356,63 @@ Options:
 ```
 </step>
 
+<step name="verify-impact">
+**Verify impacted areas still work:**
+
+Based on the Impact Analysis from earlier, verify each affected area:
+
+```
+Impact Verification:
+```
+
+**For each impacted file, perform appropriate checks:**
+
+```bash
+# Run specific tests for impacted areas
+bundle exec rspec spec/models/impacted_model_spec.rb
+npm test -- --testPathPattern="impacted"
+
+# For Rails: check routes still work
+bundle exec rails routes | grep "impacted_resource"
+
+# For Next.js: verify pages build
+npm run build
+
+# For any project: run linter/type checks
+bundle exec rubocop app/controllers/impacted_controller.rb
+npx tsc --noEmit
+```
+
+**Check for breaking changes:**
+```bash
+# Verify imports/exports still valid
+grep -rn "import.*ModifiedExport" src/ --include="*.ts" --include="*.tsx"
+
+# Check for undefined/nil errors in logs (if dev server available)
+# Look for TypeScript errors on modified interfaces
+```
+
+**Display verification results:**
+```
+Impact Verification Results:
+✅ app/controllers/bookings_controller.rb - still works (tests pass)
+✅ app/services/availability_service.rb - no breaking changes
+⚠️  app/views/studios/show.html.erb - may need visual review
+✅ spec/models/studio_spec.rb - all 12 tests pass
+```
+
+**If issues found in impacted areas:**
+```
+[AskUserQuestion]
+Question: "Found issues in impacted areas. What do you want to do?"
+Header: "Impact Issues"
+Options:
+- "Fix them now (Recommended)" - description: "Address the breaking changes"
+- "Create follow-up issue" - description: "Track as separate task"
+- "Proceed anyway" - description: "I'll handle it later"
+```
+</step>
+
 <step name="complete">
 **When implementation is complete:**
 
@@ -269,11 +422,17 @@ Options:
 ✓ Branch: feature/22-studio-working-hours
 ✓ Assigned to @you
 ✓ All acceptance criteria met
+✓ Impact areas verified
 
 Atomic commits (traceable to issue):
   • abc1234 feat(#22): add working hours model
   • def5678 feat(#22): add configuration UI
   • ghi9012 test(#22): add model specs
+
+Impact verification:
+  • 4 dependent files checked
+  • 3 impacted areas verified
+  • All tests passing
 
 Ready to ship? Run: /sheep:it 22
 
