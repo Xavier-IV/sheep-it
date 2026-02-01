@@ -81,7 +81,8 @@ Parse:
 - Title and description
 - Acceptance criteria (checkboxes)
 - Tasks/subtasks
-- Any comments (might have progress notes)
+- Research Summary (if present from /sheep:research or --deep)
+- Any comments (might have progress notes or collapsible research findings)
 </step>
 
 <step name="analyze-progress">
@@ -133,6 +134,7 @@ Remaining Acceptance Criteria (from issue):
 - If uncommitted changes exist → continue that work
 - If clean state → start next unchecked acceptance criterion
 - Each atomic commit is a safe checkpoint to resume from
+- If research comments exist → use them for context (expand <details> sections)
 </step>
 
 <step name="confirm-continue">
