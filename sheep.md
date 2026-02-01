@@ -19,6 +19,7 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 |---------|-------------|
 | `/sheep:init` | Initialize new project (private by default) + create board |
 | `/sheep:task` | Create a GitHub Issue (auto-adds to board) |
+| `/sheep:task --deep` | Deep research before creating issue |
 | `/sheep:tasks` | List open issues |
 | `/sheep:milestone` | Create a milestone |
 | `/sheep:milestones` | List milestones with progress |

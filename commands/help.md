@@ -38,6 +38,7 @@ SETUP
 
 PLANNING (Interactive brainstorming)
   /sheep:task "title"          Brainstorm → refine → create issue
+  /sheep:task "title" --deep   Deep research before creating issue
   /sheep:milestone "v1.0"      Create milestone with due date
   /sheep:research [issue]      Deep research with parallel agents
 
