@@ -24,7 +24,9 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 | `/sheep:milestones` | List milestones with progress |
 | `/sheep:progress` | Show milestone progress |
 | `/sheep:board` | View/manage GitHub Project board |
+| `/sheep:research` | Deep research with parallel agents (codebase, docs, approaches) |
 | `/sheep:start` | Start working on an issue (branch + move to In Progress) |
+| `/sheep:start --deep` | Research first, then implement |
 | `/sheep:it` | 🐑 Ship it! Create PR (move to Review) |
 | `/sheep:release` | Create GitHub release |
 | `/sheep:help` | Show this help |
