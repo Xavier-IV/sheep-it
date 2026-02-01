@@ -19,6 +19,8 @@ allowed-tools:
   - Grep
   - AskUserQuestion
   - Task
+  - WebSearch
+  - WebFetch
 ---
 
 <objective>
@@ -30,6 +32,7 @@ This is the core command - it reads the issue spec and builds it.
 ```
 /sheep:start 22                # Start and implement issue #22
 /sheep:start                   # Pick from open issues, then implement
+/sheep:start 22 --deep         # Deep research first, then implement
 ```
 </usage>
 
@@ -66,6 +69,135 @@ Parse the issue body for:
 - **Tasks** - implementation subtasks
 
 This is your implementation spec!
+</step>
+
+<step name="deep-research" condition="--deep flag present">
+**Run deep research before implementation (if --deep flag):**
+
+If the user ran `/sheep:start 22 --deep`, run comprehensive research using parallel agents
+before proceeding to implementation.
+
+**Spawn parallel research agents:**
+
+Use the Task tool to launch multiple agents concurrently:
+
+```
+[Task subagent_type="Explore" description="Codebase analysis"]
+prompt: |
+  Research the codebase for issue #{number}: {title}
+
+  Issue context:
+  {why_section}
+  {what_section}
+
+  Find:
+  1. Related files and patterns
+  2. Dependencies (code this feature relies on)
+  3. Impact areas (code that may be affected)
+  4. Existing conventions to follow
+
+  Return structured analysis with file paths and descriptions.
+```
+
+```
+[Task subagent_type="general-purpose" description="External docs research"]
+prompt: |
+  Research external documentation for: {title}
+
+  Context: {why_section} {what_section}
+
+  Find:
+  1. Relevant framework/library documentation
+  2. Best practices for this type of feature
+  3. Common pitfalls to avoid
+
+  Return practical, actionable information with source URLs.
+```
+
+```
+[Task subagent_type="general-purpose" description="Approach evaluation"]
+prompt: |
+  Evaluate implementation approaches for: {title}
+
+  Context: {why_section} {what_section}
+  Acceptance Criteria: {acceptance_criteria}
+
+  Identify 2-3 approaches with:
+  - Description, Pros, Cons
+  - Recommend best approach with reasoning
+```
+
+**Post research as collapsible comment:**
+
+```bash
+gh issue comment 22 --body "$(cat <<'EOF'
+## Deep Research Complete
+
+<details>
+<summary>Codebase Analysis</summary>
+
+### Related Files
+- `path/to/file.rb` - Description
+
+### Dependencies
+- `path/to/dependency.rb` - What it provides
+
+### Impact Areas
+- `path/to/impacted.rb` - Why affected
+
+</details>
+
+<details>
+<summary>Approaches Considered</summary>
+
+### Approach 1: [Name]
+**Pros:** ...
+**Cons:** ...
+
+### Recommendation
+[Selected approach] because [reasoning]
+
+</details>
+
+<details>
+<summary>External Research</summary>
+
+### Documentation
+- [Link](url) - Description
+
+### Best Practices
+- Practice 1
+- Practice 2
+
+</details>
+EOF
+)"
+```
+
+**Update issue with research summary:**
+
+Append concise summary to issue description:
+
+```bash
+gh issue edit 22 --body "[original body]
+
+---
+
+## Research Summary
+
+**Recommended Approach:** [Approach]
+
+**Key Findings:**
+- Finding 1
+- Finding 2
+
+**Files to Modify:** [list]
+
+See collapsible comments for detailed research.
+"
+```
+
+Continue to implementation with research context loaded.
 </step>
 
 <step name="create-branch">

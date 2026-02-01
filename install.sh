@@ -21,6 +21,7 @@ COMMAND_FILES=(
     "milestones.md"
     "progress.md"
     "release.md"
+    "research.md"
     "resume.md"
     "review.md"
     "start.md"

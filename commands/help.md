@@ -38,10 +38,13 @@ SETUP
 
 PLANNING (Interactive brainstorming)
   /sheep:task "title"          Brainstorm → refine → create issue
+  /sheep:task "title" --deep   Deep research before creating issue
   /sheep:milestone "v1.0"      Create milestone with due date
+  /sheep:research [issue]      Deep research with parallel agents
 
 WORKING
   /sheep:start [issue]         Pick issue → implement → commit
+  /sheep:start [issue] --deep  Research first, then implement
   /sheep:resume                Continue after context reset
   /sheep:status                Quick "where am I?" check
   /sheep:verify [issue]        Verify against acceptance criteria
@@ -95,8 +98,10 @@ BOARD FLOW
 KEY FEATURES
   • Interactive questions for all decisions
   • /sheep:start WRITES CODE, not just creates branch
+  • /sheep:research spawns parallel agents for deep research
   • Auto-updates issue checkboxes as you complete them
   • Posts progress comments on issues
+  • Research findings posted as collapsible <details> comments
   • /sheep:resume picks up after context resets
   • All context saved in GitHub - run /clear anytime
 

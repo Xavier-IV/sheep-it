@@ -11,6 +11,9 @@ allowed-tools:
   - Grep
   - Read
   - AskUserQuestion
+  - Task
+  - WebSearch
+  - WebFetch
 ---
 
 <objective>
@@ -22,6 +25,7 @@ Use AskUserQuestion tool for all clarifications - make it feel like a collaborat
 ```
 /sheep:task "Add user login"      # Start brainstorming with initial idea
 /sheep:task                       # Start from scratch
+/sheep:task "Add payments" --deep # Deep research before creating issue
 ```
 </usage>
 
@@ -76,6 +80,96 @@ Options (multiSelect: true):
 - "Subscription management"
 - "Webhook handling"
 ```
+</step>
+
+<step name="deep-research" condition="--deep flag present">
+**Run deep research before creating issue (if --deep flag):**
+
+If the user ran `/sheep:task "feature" --deep`, spawn parallel research agents to gather
+comprehensive information BEFORE creating the issue. This creates a much better spec.
+
+**Spawn parallel research agents:**
+
+Use the Task tool to launch multiple agents concurrently:
+
+```
+[Task subagent_type="Explore" description="Codebase analysis for task"]
+prompt: |
+  Research the codebase for a new feature: {task_title}
+
+  User's description: {user_description}
+
+  Find:
+  1. Related files and existing patterns
+  2. Dependencies (code this feature will rely on)
+  3. Impact areas (code that may be affected)
+  4. Similar implementations to reference
+  5. Conventions to follow
+
+  Return structured analysis with file paths and descriptions.
+```
+
+```
+[Task subagent_type="general-purpose" description="External docs research"]
+prompt: |
+  Research external documentation for: {task_title}
+
+  Context: {user_description}
+
+  Find:
+  1. Relevant framework/library documentation
+  2. Best practices for this type of feature
+  3. Common pitfalls to avoid
+  4. Security considerations
+
+  Return practical information with source URLs.
+```
+
+```
+[Task subagent_type="general-purpose" description="Approach evaluation"]
+prompt: |
+  Evaluate implementation approaches for: {task_title}
+
+  Context: {user_description}
+
+  Identify 2-3 approaches with:
+  - Description, Pros, Cons
+  - Effort estimate (Low/Medium/High)
+  - Recommend best approach with reasoning
+```
+
+**Synthesize research into issue content:**
+
+The research findings will be used to create a more detailed issue:
+- Dependencies section from codebase analysis
+- Impact Analysis from codebase analysis
+- Recommended Approach section from approach evaluation
+- Best Practices/Pitfalls in description from external research
+- More informed Acceptance Criteria
+
+**Show research summary to user:**
+
+```
+Deep Research Complete
+
+📁 Codebase Analysis:
+  • Found 5 related files
+  • 3 dependencies identified
+  • 2 potential impact areas
+
+⚖️ Approaches Evaluated:
+  • Approach A: [name] - Recommended
+  • Approach B: [name] - Alternative
+
+🌐 External Research:
+  • Found relevant documentation
+  • 3 best practices identified
+  • 2 pitfalls to avoid
+
+This research will be included in the issue for better context.
+```
+
+Continue to structure step with enriched content.
 </step>
 
 <step name="analyze-impact">
@@ -221,7 +315,48 @@ Based on conversation, build:
    - [ ] Subtask 2
    ```
 
-**Note:** The Dependencies and Impact Analysis sections come from the `analyze-impact` step.
+   **Additional sections when --deep flag used:**
+   ```markdown
+   ## Recommended Approach
+   **[Approach Name]** - [Brief description]
+
+   Why this approach:
+   - Reason 1
+   - Reason 2
+
+   <details>
+   <summary>Alternative approaches considered</summary>
+
+   ### Approach B: [Name]
+   **Pros:** ...
+   **Cons:** ...
+
+   ### Approach C: [Name]
+   **Pros:** ...
+   **Cons:** ...
+
+   </details>
+
+   ## Research Notes
+   <details>
+   <summary>Best practices & pitfalls</summary>
+
+   **Best Practices:**
+   - Practice 1
+   - Practice 2
+
+   **Pitfalls to Avoid:**
+   - Pitfall 1
+   - Pitfall 2
+
+   **References:**
+   - [Doc 1](url)
+   - [Doc 2](url)
+
+   </details>
+   ```
+
+**Note:** The Dependencies and Impact Analysis sections come from the `analyze-impact` step (or `deep-research` step if --deep was used).
 If no significant dependencies or impacts were found, these sections can be omitted or marked as "None identified".
 </step>
 
@@ -322,6 +457,7 @@ EOF
 🚀 Ready to start? Run: /sheep:start 22
 
 💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
+💡 Used --deep? Your research is saved in the issue body!
 ```
 </step>
 
@@ -437,6 +573,86 @@ Claude: Got it - Stripe subscriptions. This is actually a few tasks:
 User selects: All of them
 
 Claude: I'll create 4 linked issues. Let's start with the first one...
+```
+
+**Example 3: Deep research mode**
+```
+User: /sheep:task "Add user authentication" --deep
+
+Claude: Got it - adding authentication with deep research. Let me gather comprehensive information first.
+
+[Spawns parallel research agents...]
+
+Deep Research Complete
+
+📁 Codebase Analysis:
+  • Found User model at app/models/user.rb
+  • Session handling in app/controllers/application_controller.rb
+  • No existing auth gem detected
+
+⚖️ Approaches Evaluated:
+  • Devise gem - Recommended (battle-tested, full-featured)
+  • Roll your own - More control, more work
+  • Auth0/external - Good for enterprise, adds dependency
+
+🌐 External Research:
+  • Rails security guide recommends bcrypt
+  • OWASP: rate limiting, secure sessions
+  • Pitfall: Don't store passwords in plain text
+
+Now let me structure the issue with this research...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 PREVIEW
+
+Title: Add user authentication with Devise
+Labels: enhancement
+
+## Why
+Users need to securely log in to access personalized features.
+
+## What
+Implement authentication using Devise gem with email/password.
+
+## Dependencies
+> This feature relies on:
+- `app/models/user.rb` - User model (needs email, password fields)
+- `app/controllers/application_controller.rb` - Will add auth helpers
+
+## Impact Analysis
+> Changes here may affect:
+- `config/routes.rb` - Devise routes
+- `app/views/layouts/application.html.erb` - Login/logout links
+
+## Recommended Approach
+**Devise gem** - Battle-tested Rails authentication
+
+Why this approach:
+- Widely used, well-documented
+- Handles security best practices
+- Easy to extend (confirmable, lockable, etc.)
+
+<details>
+<summary>Alternative approaches considered</summary>
+
+### Roll your own
+**Pros:** Full control, no dependencies
+**Cons:** Security risks, more code to maintain
+
+### Auth0
+**Pros:** Enterprise features, SSO
+**Cons:** External dependency, cost at scale
+
+</details>
+
+## Acceptance Criteria
+- [ ] Users can register with email/password
+- [ ] Users can log in and log out
+- [ ] Protected routes require authentication
+- [ ] Password reset flow works
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[AskUserQuestion: "Create this issue?" → Yes / Edit / Cancel]
 ```
 
 </examples>
