@@ -75,6 +75,61 @@ Options (multiSelect: true):
 ```
 </step>
 
+<step name="analyze-impact">
+**Analyze codebase for dependencies and impact:**
+
+Once you understand the task scope, explore the codebase to identify:
+1. **Dependencies** - What existing code this feature will rely on
+2. **Impact** - What existing code might be affected by these changes (domino effect)
+
+**For Rails projects:**
+```bash
+# Find model associations and dependencies
+grep -r "belongs_to\|has_many\|has_one" app/models/ --include="*.rb"
+
+# Find usages of related models/services
+grep -rn "ClassName" app/ --include="*.rb" | head -20
+
+# Find controller actions that might be affected
+grep -rn "def.*action_name\|@variable_name" app/controllers/ --include="*.rb"
+```
+
+**For Next.js/React projects:**
+```bash
+# Find component imports
+grep -rn "import.*ComponentName" src/ --include="*.tsx" --include="*.ts"
+
+# Find API route usages
+grep -rn "fetch.*api/route\|useQuery\|useMutation" src/ --include="*.tsx" --include="*.ts"
+
+# Find shared hooks/utilities being used
+grep -rn "useHookName\|utilityFunction" src/ --include="*.tsx" --include="*.ts"
+```
+
+**For generic codebases:**
+```bash
+# Find file imports/requires
+grep -rn "import\|require" . --include="*.js" --include="*.ts" --include="*.py" | grep "related_term"
+
+# Find function/class usages
+grep -rn "functionName\|ClassName" . --include="*.js" --include="*.ts" --include="*.py"
+```
+
+**Use Glob to find related files:**
+```bash
+# Find files by naming patterns
+ls -la app/models/*related*.rb
+ls -la src/components/*Related*
+```
+
+**Document findings for the issue body:**
+- List files that will be dependencies (code this feature relies on)
+- List files that may be impacted (code that depends on what you'll change)
+- Note any tests that cover impacted areas
+
+This analysis will be included in the issue body to help AI implementation understand context and verify impacted areas.
+</step>
+
 <step name="find-related">
 **Look for related context:**
 
@@ -148,6 +203,17 @@ Based on conversation, build:
    ## What
    [Brief description of the solution]
 
+   ## Dependencies
+   > This feature relies on:
+   - `path/to/file.rb` - Brief description of dependency
+   - `path/to/service.rb` - What it provides
+
+   ## Impact Analysis
+   > Changes here may affect:
+   - `path/to/controller.rb` - Uses the modified code
+   - `path/to/view.erb` - Displays related data
+   - `spec/path/to/spec.rb` - Existing tests to verify
+
    ## Acceptance Criteria
    - [ ] Criterion 1
    - [ ] Criterion 2
@@ -157,6 +223,9 @@ Based on conversation, build:
    - [ ] Subtask 1
    - [ ] Subtask 2
    ```
+
+**Note:** The Dependencies and Impact Analysis sections come from the `analyze-impact` step.
+If no significant dependencies or impacts were found, these sections can be omitted or marked as "None identified".
 </step>
 
 <step name="preview">
@@ -177,6 +246,17 @@ Customers need to access their order history.
 
 ## What
 Add a login form with email/password authentication.
+
+## Dependencies
+> This feature relies on:
+- `app/models/user.rb` - User model for authentication
+- `app/services/auth_service.rb` - Authentication logic
+
+## Impact Analysis
+> Changes here may affect:
+- `app/controllers/sessions_controller.rb` - Login flow
+- `app/views/layouts/application.html.erb` - Nav login link
+- `spec/features/login_spec.rb` - Existing login tests
 
 ## Acceptance Criteria
 - [ ] Login form with email and password fields
@@ -208,6 +288,17 @@ Customers need to access their order history.
 
 ## What
 Add a login form with email/password authentication.
+
+## Dependencies
+> This feature relies on:
+- `app/models/user.rb` - User model for authentication
+- `app/services/auth_service.rb` - Authentication logic
+
+## Impact Analysis
+> Changes here may affect:
+- `app/controllers/sessions_controller.rb` - Login flow
+- `app/views/layouts/application.html.erb` - Nav login link
+- `spec/features/login_spec.rb` - Existing login tests
 
 ## Acceptance Criteria
 - [ ] Login form with email and password fields
