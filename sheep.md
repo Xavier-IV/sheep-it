@@ -28,6 +28,7 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 | `/sheep:research` | Deep research with parallel agents (codebase, docs, approaches) |
 | `/sheep:start` | Start working on an issue (branch + move to In Progress) |
 | `/sheep:start --deep` | Research first, then implement |
+| `/sheep:start --yolo` | Autonomous mode - no prompts, auto-creates PR |
 | `/sheep:it` | 🐑 Ship it! Create PR (move to Review) |
 | `/sheep:release` | Create GitHub release |
 | `/sheep:help` | Show this help |
@@ -64,3 +65,20 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 /sheep:it       →  Move to Review
 PR merged       →  Move to Done ✓
 ```
+
+## YOLO Mode
+
+Fire-and-forget autonomous execution for well-defined tasks.
+
+```
+/sheep:task "Add button"     →  "Is this YOLO-safe?" → ✅ Yes
+                                 Issue has <!-- YOLO:safe --> metadata
+/sheep:start 22 --yolo       →  Runs autonomously
+                                 Posts progress to issue
+                                 Auto-creates PR when done
+```
+
+**YOLO-safe tasks:** Clear criteria, low-risk, well-understood scope
+**Needs supervision:** Vague requirements, critical systems, large refactors
+
+Use `--force` to override: `/sheep:start 22 --yolo --force`
