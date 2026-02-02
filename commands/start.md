@@ -33,6 +33,9 @@ This is the core command - it reads the issue spec and builds it.
 /sheep:start 22                # Start and implement issue #22
 /sheep:start                   # Pick from open issues, then implement
 /sheep:start 22 --deep         # Deep research first, then implement
+/sheep:start 22 --yolo         # Autonomous mode (if YOLO-safe)
+/sheep:start 22 --yolo --force # Override YOLO safety check
+/sheep:start 22 --yolo --deep  # Research first, then autonomous
 ```
 </usage>
 
@@ -69,6 +72,84 @@ Parse the issue body for:
 - **Tasks** - implementation subtasks
 
 This is your implementation spec!
+</step>
+
+<step name="check-yolo" condition="--yolo flag present">
+**Check YOLO safety (if --yolo flag):**
+
+If the user ran `/sheep:start 22 --yolo`, check if the issue is marked as YOLO-safe.
+
+**Parse YOLO metadata from issue body:**
+
+Look for HTML comment in issue body:
+- `<!-- YOLO:safe -->` → Proceed autonomously
+- `<!-- YOLO:unsafe -->` → Warn and require confirmation
+- No metadata → Treat as unsafe, require confirmation
+
+```
+# Check for YOLO metadata in issue body
+if issue_body contains "<!-- YOLO:safe -->":
+    yolo_allowed = true
+elif issue_body contains "<!-- YOLO:unsafe -->":
+    yolo_allowed = false
+else:
+    yolo_allowed = false  # No metadata = unsafe by default
+```
+
+**If YOLO not allowed (and no --force flag):**
+
+```
+⚠️  YOLO MODE BLOCKED
+
+This issue is not marked as YOLO-safe.
+
+Reason: [Issue marked as requiring supervision / No YOLO metadata found]
+
+To proceed anyway, use: /sheep:start 22 --yolo --force
+Or run without --yolo for interactive mode: /sheep:start 22
+```
+
+```
+[AskUserQuestion]
+Question: "This issue isn't YOLO-safe. What do you want to do?"
+Header: "YOLO Blocked"
+Options:
+- "Continue interactively (Recommended)" - description: "Run without --yolo"
+- "Force YOLO anyway" - description: "I accept the risks"
+- "Cancel" - description: "Not now"
+```
+
+**If YOLO allowed (or --force flag):**
+
+```
+🐑 YOLO MODE ACTIVATED
+
+This issue is marked as YOLO-safe. Running autonomously.
+Progress updates will be posted to the issue.
+
+You can check back anytime or wait for the PR!
+```
+
+**Post YOLO start comment:**
+
+```bash
+gh issue comment 22 --body "🐑 **YOLO MODE ACTIVATED**
+
+Running autonomous implementation. Progress updates will be posted here.
+
+- Branch: \`feature/22-issue-title\`
+- Mode: Autonomous (no human prompts)
+- Started: $(date)
+
+Check back for updates or wait for the PR! 🚀"
+```
+
+**YOLO mode behavior:**
+- Skip all `AskUserQuestion` prompts - make reasonable default choices
+- Post progress comments at key milestones
+- Continue through errors if possible (commit what works)
+- Auto-create PR when complete
+- Post final summary to issue
 </step>
 
 <step name="deep-research" condition="--deep flag present">
@@ -461,6 +542,29 @@ This is the core work. Based on the issue spec:
    - Run type checks
    - Run tests
    - Run security checks (e.g., brakeman for Rails)
+
+7. **Post progress comments (YOLO mode):**
+
+   In YOLO mode, post progress updates to the issue at key milestones:
+
+   ```bash
+   gh issue comment 22 --body "🐑 **Progress Update**
+
+   ✅ Completed: [Acceptance criterion or subtask]
+
+   Next up: [What's being worked on next]
+
+   Commits so far:
+   - abc1234 feat(#22): description
+   - def5678 feat(#22): description"
+   ```
+
+   Post updates after:
+   - Each acceptance criterion completed
+   - Each major subtask completed
+   - Any errors or blockers encountered
+
+   This keeps the issue as a live log of autonomous progress.
 </step>
 
 <step name="verify">
@@ -571,6 +675,46 @@ Ready to ship? Run: /sheep:it 22
 💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 💡 Each commit references #22, making history fully traceable.
 ```
+
+**In YOLO mode, auto-create PR:**
+
+```bash
+# Push branch
+git push -u origin HEAD
+
+# Create PR
+gh pr create \
+  --title "feat: [Issue title] (#22)" \
+  --body "Closes #22
+
+## Summary
+[Auto-generated summary of changes]
+
+## Commits
+[List of commits]
+
+---
+🐑 This PR was created autonomously in YOLO mode.
+Please review the changes before merging."
+```
+
+**Post completion comment to issue:**
+
+```bash
+gh issue comment 22 --body "🐑 **YOLO MODE COMPLETE**
+
+✅ All acceptance criteria implemented
+✅ PR created: #45
+
+**Summary:**
+- X commits made
+- Y files changed
+- All checks passing
+
+**PR:** https://github.com/owner/repo/pull/45
+
+Please review the PR and merge when ready! 🎉"
+```
 </step>
 
 </process>
@@ -597,9 +741,18 @@ If the issue is too big:
 </implementation-guidelines>
 
 <interaction-style>
+**Normal mode:**
 - Confirm approach before writing code
 - Show progress as you implement
 - Commit incrementally with good messages
 - Verify acceptance criteria at the end
 - Use AskUserQuestion for any decisions
+
+**YOLO mode (--yolo flag):**
+- Check YOLO metadata in issue first
+- Skip all AskUserQuestion prompts
+- Make reasonable default choices autonomously
+- Post progress comments to issue instead of asking
+- Auto-create PR when complete
+- Post final summary to issue
 </interaction-style>

@@ -277,6 +277,35 @@ Options:
 ```
 </step>
 
+<step name="yolo-safety">
+**Determine YOLO safety (use AskUserQuestion):**
+
+Ask if this task is safe for autonomous execution:
+
+```
+[AskUserQuestion]
+Question: "Is this task safe for autonomous execution (YOLO mode)?"
+Header: "YOLO"
+Options:
+- "✅ Yes, YOLO-safe (Recommended)" - description: "Well-defined, low-risk, can run unattended"
+- "⚠️ No, needs supervision" - description: "Complex, high-risk, or unclear scope"
+```
+
+**Guidelines for YOLO-safe tasks:**
+- Clear, specific acceptance criteria
+- Low-risk changes (no auth, payments, data migrations)
+- Well-understood scope
+- Additive changes (not modifying critical existing behavior)
+
+**Guidelines for tasks needing supervision:**
+- Vague or open-ended requirements
+- Touches critical systems (auth, payments, user data)
+- Large refactors affecting many files
+- Unclear edge cases or trade-offs
+
+The answer will be stored in the issue body as metadata for `/sheep:start --yolo` to check.
+</step>
+
 <step name="structure">
 **Structure the issue:**
 
@@ -313,7 +342,20 @@ Based on conversation, build:
    ## Tasks (if complex)
    - [ ] Subtask 1
    - [ ] Subtask 2
+
+   ## Automation
+   <!-- YOLO:safe -->
+   ✅ **YOLO-safe** - This task can be executed autonomously
+
+   OR
+
+   <!-- YOLO:unsafe -->
+   ⚠️ **Requires supervision** - Human review needed during implementation
    ```
+
+   **Note:** The Automation section is determined by the `yolo-safety` step.
+   The HTML comment (`<!-- YOLO:safe -->` or `<!-- YOLO:unsafe -->`) is machine-readable
+   metadata that `/sheep:start --yolo` uses to determine if autonomous execution is allowed.
 
    **Additional sections when --deep flag used:**
    ```markdown
@@ -394,6 +436,10 @@ Add a login form with email/password authentication.
 - [ ] Login form with email and password fields
 - [ ] Error message for invalid credentials
 - [ ] Redirect to dashboard on success
+
+## Automation
+<!-- YOLO:safe -->
+✅ **YOLO-safe** - This task can be executed autonomously
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -436,6 +482,10 @@ Add a login form with email/password authentication.
 - [ ] Login form with email and password fields
 - [ ] Error message for invalid credentials
 - [ ] Redirect to dashboard on success
+
+## Automation
+<!-- YOLO:safe -->
+✅ **YOLO-safe** - This task can be executed autonomously
 EOF
 )" \
   --label "enhancement" \
@@ -455,6 +505,7 @@ EOF
    → Added to Backlog
 
 🚀 Ready to start? Run: /sheep:start 22
+🚀 YOLO-safe? Run: /sheep:start 22 --yolo (autonomous mode!)
 
 💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
 💡 Used --deep? Your research is saved in the issue body!

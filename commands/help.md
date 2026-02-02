@@ -45,6 +45,7 @@ PLANNING (Interactive brainstorming)
 WORKING
   /sheep:start [issue]         Pick issue → implement → commit
   /sheep:start [issue] --deep  Research first, then implement
+  /sheep:start [issue] --yolo  Autonomous mode (no prompts, auto-PR)
   /sheep:resume                Continue after context reset
   /sheep:status                Quick "where am I?" check
   /sheep:verify [issue]        Verify against acceptance criteria
@@ -93,11 +94,28 @@ BOARD FLOW
   └──────────┘   └─────────────┘   └────────┘   └──────┘
      task           start             it         merged
 
+YOLO WORKFLOW (Fire & Forget)
+  ┌─────────────────────────────────────────────────────┐
+  │  /sheep:task "Add button"                           │
+  │      ↓ "Is this YOLO-safe?" → ✅ Yes                │
+  │      ↓ Issue created with YOLO:safe metadata        │
+  │  /sheep:start 22 --yolo                             │
+  │      ↓ Checks metadata → safe!                      │
+  │      ↓ Runs autonomously (no prompts) 🐑💨          │
+  │      ↓ Posts progress to issue                      │
+  │      ↓ Auto-creates PR when done                    │
+  │  [You review PR when ready]                         │
+  └─────────────────────────────────────────────────────┘
+
+  Perfect for: background tasks, overnight runs, bot agents
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 KEY FEATURES
   • Interactive questions for all decisions
   • /sheep:start WRITES CODE, not just creates branch
+  • /sheep:start --yolo runs autonomously (fire and forget!)
+  • /sheep:task marks issues as YOLO-safe or not
   • /sheep:research spawns parallel agents for deep research
   • Auto-updates issue checkboxes as you complete them
   • Posts progress comments on issues
