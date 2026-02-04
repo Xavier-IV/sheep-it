@@ -12,6 +12,9 @@ allowed-tools:
   - Bash(git push *)
   - Bash(git add *)
   - Bash(git commit *)
+  - Bash(git fetch *)
+  - Bash(git pull *)
+  - Bash(git status *)
   - Read
   - Write
   - Edit
@@ -281,8 +284,124 @@ See collapsible comments for detailed research.
 Continue to implementation with research context loaded.
 </step>
 
+<step name="ensure-clean-base">
+**Ensure we're starting from a clean, up-to-date base branch:**
+
+This step prevents accidentally creating feature branches from other feature branches.
+
+**1. Check for uncommitted changes:**
+
+```bash
+git status --porcelain
+```
+
+If there are uncommitted changes:
+```
+⚠️  UNCOMMITTED CHANGES DETECTED
+
+You have uncommitted changes in your working directory.
+Please commit or stash your changes before starting a new task.
+
+Files with changes:
+[list of files from git status]
+
+To stash: git stash push -m "WIP before starting #22"
+To commit: git add . && git commit -m "WIP"
+```
+
+Stop here and do NOT proceed until working directory is clean.
+
+**2. Check current branch:**
+
+```bash
+git branch --show-current
+```
+
+**3. Determine if branch switch is needed:**
+
+```
+# Parse the issue number from the command (e.g., 22)
+issue_number = [issue number being started]
+
+# Get current branch
+current_branch = [result of git branch --show-current]
+
+# Check if current branch matches the issue (resuming work)
+# Match patterns like: feature/22-*, 22-*, issue-22-*, etc.
+if current_branch contains "/{issue_number}-" or
+   current_branch starts with "{issue_number}-" or
+   current_branch contains "-{issue_number}-":
+    # User is resuming work on this issue - allow it
+    branch_matches_issue = true
+else:
+    branch_matches_issue = false
+
+# Check if on main/master
+if current_branch == "main" or current_branch == "master":
+    on_main = true
+else:
+    on_main = false
+```
+
+**4. Handle branch scenarios:**
+
+**Scenario A: Branch matches the issue (resuming work)**
+```
+✅ Already on branch for issue #22: feature/22-description
+
+Resuming work on this issue.
+```
+Skip to the `assign` step (don't create a new branch).
+
+**Scenario B: On main/master (correct starting point)**
+```
+✅ On main branch - good starting point
+
+Fetching latest changes...
+```
+```bash
+git fetch origin
+git pull origin main  # or master
+```
+Continue to `create-branch` step.
+
+**Scenario C: On a different branch (needs auto-switch)**
+```
+⚠️  BRANCH MISMATCH
+
+You're on branch: feature/15-other-task
+But starting task: #22
+
+Auto-switching to main branch...
+```
+```bash
+git fetch origin
+git checkout main  # or master, whichever exists
+git pull origin main
+```
+```
+✅ Switched to main and pulled latest.
+
+Now on: main (up to date with origin)
+```
+Continue to `create-branch` step.
+
+**5. Detect main vs master:**
+
+```bash
+# Check which default branch exists
+git show-ref --verify --quiet refs/heads/main && echo "main" || echo "master"
+# Or check remote
+git remote show origin | grep "HEAD branch" | cut -d: -f2 | tr -d ' '
+```
+
+Use whichever branch exists (main or master) for all operations.
+</step>
+
 <step name="create-branch">
 **Create and checkout branch:**
+
+Only run this step if NOT resuming work (i.e., `branch_matches_issue` is false).
 
 ```bash
 git checkout -b feature/22-studio-working-hours
