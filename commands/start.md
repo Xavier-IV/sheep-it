@@ -327,15 +327,35 @@ issue_number = [issue number being started]
 current_branch = [result of git branch --show-current]
 
 # Check if current branch matches the issue (resuming work)
+# IMPORTANT: Use word boundaries to prevent false positives!
+# e.g., issue #2 should NOT match "feature/22-something"
+#
 # Match patterns like: feature/22-*, 22-*, issue-22-*, etc.
-if current_branch contains "/{issue_number}-" or
-   current_branch starts with "{issue_number}-" or
-   current_branch contains "-{issue_number}-":
-    # User is resuming work on this issue - allow it
-    branch_matches_issue = true
-else:
-    branch_matches_issue = false
+# Use regex with proper anchoring:
+#   - "/(issue_number)-" matches "feature/22-desc" but NOT "feature/122-desc"
+#   - "^(issue_number)-" matches "22-desc" at start
+#   - "-(issue_number)-" matches "issue-22-desc" but NOT "issue-122-desc"
+```
 
+**Bash implementation for exact matching:**
+
+```bash
+issue_number=22
+current_branch=$(git branch --show-current)
+
+# Use regex with word boundaries (number must be preceded by / or - or start of string)
+if [[ "$current_branch" =~ (^|/)${issue_number}- ]] || \
+   [[ "$current_branch" =~ -${issue_number}- ]]; then
+    branch_matches_issue=true
+else
+    branch_matches_issue=false
+fi
+```
+
+This ensures issue `#2` only matches branches like `feature/2-desc`, `2-desc`, or `prefix-2-desc`,
+but NOT `feature/22-desc` or `feature/122-desc`.
+
+```
 # Check if on main/master
 if current_branch == "main" or current_branch == "master":
     on_main = true
