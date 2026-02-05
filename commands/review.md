@@ -10,6 +10,8 @@ allowed-tools:
   - Bash(gh api repos/*/pulls/*/comments*)
   - Bash(gh api repos/*/pulls/*/reviews*)
   - Bash(gh api repos/*/issues/*/comments*)
+  - Bash(gh run list *)
+  - Bash(gh run view *)
   - Read
   - Glob
   - Grep
