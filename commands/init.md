@@ -146,6 +146,52 @@ gh project link <project-number> --owner @me --repo <owner>/<repo-name>
 ```
 </step>
 
+<step name="detect-adapter">
+**Detect and offer adapter configuration:**
+
+Check if any adapter skills are available (e.g., OpenSpec):
+
+```
+# Check for common adapter patterns in available skills
+# e.g., /openspec:proposal, /openspec:apply, /openspec:archive
+```
+
+If adapter detected:
+```
+🔌 Adapter detected: OpenSpec
+
+OpenSpec commands are available in your Claude Code setup.
+This allows richer spec creation and implementation workflows.
+```
+
+```
+[AskUserQuestion]
+Question: "Configure OpenSpec adapter integration?"
+Header: "Adapter"
+Options:
+- "Yes, enable adapter (Recommended)" - description: "Use OpenSpec for specs and implementation"
+- "No, use default Sheep It flow" - description: "Skip adapter integration"
+- "Configure later" - description: "Run /sheep:config to set up later"
+```
+
+If "Yes, enable adapter":
+- Create `.sheeprc.yml` with adapter configuration
+- Show: "✓ Adapter configured: OpenSpec"
+
+```yaml
+# .sheeprc.yml (created)
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    task: "openspec:proposal"
+    start: "openspec:apply"
+    ship: "openspec:archive"
+```
+
+If no adapter detected, skip this step silently.
+</step>
+
 <step name="next-steps">
 **Ask about next steps (multiSelect):**
 
@@ -156,11 +202,12 @@ Header: "Next steps"
 Options:
 - "Create first milestone (Recommended)" - description: "Plan your first release"
 - "Create first task" - description: "Add something to your backlog"
+- "Configure settings" - description: "Set up branch naming, commits, adapters"
 - "I'm done for now" - description: "Exit setup"
 ```
 
-User can select both milestone AND task, or just one, or skip.
-Route to selected commands in order: milestone first, then task.
+User can select multiple options.
+Route to selected commands in order: milestone → task → config.
 </step>
 
 <step name="confirm">
@@ -172,12 +219,21 @@ Route to selected commands in order: milestone first, then task.
 ✓ GitHub CLI authenticated as @<username>
 ✓ Repository: <owner>/<project-name> (private)
 ✓ Project board created and linked
+✓ Adapter: OpenSpec (if configured)
 
 🎉 Ready to herd!
    Repo:  https://github.com/<owner>/<project-name>
    Board: https://github.com/users/<owner>/projects/<number>
 
 💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
+```
+
+**If adapter was configured, also show:**
+```
+🔌 Adapter Integration:
+   /sheep:task  → /openspec:proposal
+   /sheep:start → /openspec:apply
+   /sheep:it    → /openspec:archive
 ```
 </step>
 
