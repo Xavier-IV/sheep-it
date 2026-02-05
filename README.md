@@ -157,7 +157,7 @@ This is just a personal tool I built for myself. If it helps you too, great!
 | `/sheep:task "title"` | Brainstorm → refine → create issue |
 | `/sheep:milestone "v1.0"` | Create milestone with due date |
 | **Working** | |
-| `/sheep:start [issue]` | Pick issue → implement → commit |
+| `/sheep:start [issue]` | Start work: branch + assign + implement (delegates to adapter if configured) |
 | `/sheep:resume` | Continue after context reset |
 | `/sheep:status` | Quick "where am I?" check |
 | `/sheep:verify [issue]` | Verify against acceptance criteria |
