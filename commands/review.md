@@ -7,6 +7,9 @@ allowed-tools:
   - Bash(gh pr checks *)
   - Bash(gh pr review *)
   - Bash(gh issue view *)
+  - Bash(gh api repos/*/pulls/*/comments*)
+  - Bash(gh api repos/*/pulls/*/reviews*)
+  - Bash(gh api repos/*/issues/*/comments*)
   - Read
   - Glob
   - Grep
