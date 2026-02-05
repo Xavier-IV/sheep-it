@@ -803,6 +803,83 @@ If one Task call fails, the others continue. Check each result and handle failur
 - Suggest manual review for failed areas
 </parallel-execution-pattern>
 
+<error-handling-strategy>
+**Graceful Degradation for Failed Agents**
+
+**When an agent fails:**
+
+1. **Log the failure clearly:**
+```
+⚠️  Agent failed: Stage 2, File Review Group 3
+    Error: Timeout after 60s
+    Affected files: spec/models/*, spec/services/*
+```
+
+2. **Continue with successful agents:**
+   - Don't abort the entire review
+   - Use results from agents that succeeded
+   - Provide partial review
+
+3. **Mark gaps in final summary:**
+```
+⚠️  PARTIAL REVIEW
+
+Failed agents (1 of 7):
+  • Stage 2, File Review Group 3 - timeout
+    Files not reviewed: spec/models/*, spec/services/*
+
+Recommendation: Manually review test files or re-run review.
+```
+
+4. **Provide actionable next steps:**
+   - If critical agent failed (CI analysis, security scan) → Warn and recommend manual check
+   - If non-critical failed (single file group) → Note it but proceed
+   - If multiple agents failed → Suggest re-running the review
+
+**Examples of failure handling:**
+
+**Minor failure (1 file group):**
+```
+✅ Review mostly complete
+
+Note: 1 of 3 file review agents timed out.
+Files not covered: app/views/*, spec/views/*
+
+Recommendation: Manually check view layer before approving.
+```
+
+**Major failure (CI analysis):**
+```
+⚠️  CRITICAL: CI analysis agent failed
+
+CI shows 2 failing checks, but error analysis failed.
+You MUST manually check CI logs before approving:
+
+gh pr checks {pr_number}
+gh run list --branch {branch} --limit 5
+
+Do not approve until CI issues are understood.
+```
+
+**Multiple failures:**
+```
+⚠️  REVIEW INCOMPLETE - Multiple agent failures
+
+3 of 7 agents failed:
+  • Stage 2: CI analysis - timeout
+  • Stage 2: File group 2 - error
+  • Stage 3: Security scan - timeout
+
+Recommendation: Re-run /sheep:review {pr_number}
+Or manually review the PR before making a decision.
+```
+
+**Performance targets (with error tolerance):**
+- **All agents succeed:** 40-70% faster than sequential
+- **1-2 agents fail:** Still 30-50% faster (graceful degradation)
+- **3+ agents fail:** Recommend re-run (likely infrastructure issue)
+</error-handling-strategy>
+
 <efficiency-principle>
 **Why fetch comments first?**
 
