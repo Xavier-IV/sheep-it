@@ -59,43 +59,117 @@ Options:
 ```
 </step>
 
-<step name="get-basic-info">
-**Get basic PR information:**
+<step name="stage-1-parallel-research">
+**Stage 1: Parallel Data Fetching**
 
-```bash
-# PR details (basic info only)
-gh pr view 45 --json number,title,body,author
+Display progress indicator to user:
+```
+🐑 Starting parallel review...
 
-# Linked issue number (from PR body "Closes #22")
-# Parse the issue number from PR body
+Stage 1/3: Fetching PR data (parallel)
+  → Agent 1: PR basic info
+  → Agent 2: PR comments & reviews
+  → Agent 3: Linked issue
+  → Agent 4: CI status
 ```
 
-Parse:
-- What the PR claims to do
-- Linked issue number (if any)
+**Launch 4 parallel agents in SINGLE message with MULTIPLE Task calls:**
+
+```
+[Task subagent_type="general-purpose" description="Fetch PR basic info"]
+prompt: |
+  Fetch basic information for PR #{pr_number}.
+
+  Use Bash tool to run:
+  gh pr view {pr_number} --json number,title,body,author
+
+  Parse and extract:
+  - PR title and description
+  - Author
+  - Linked issue number (from "Closes #X" or "Fixes #X" in body)
+
+  Return structured data with issue number if found.
+```
+
+```
+[Task subagent_type="general-purpose" description="Fetch PR comments"]
+prompt: |
+  Fetch all comments and reviews for PR #{pr_number}.
+
+  Use Bash tool to run:
+
+  # Get repository info first
+  REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
+
+  # PR conversation comments
+  gh pr view {pr_number} --json comments --jq '.comments[] | {user: .author.login, body: .body, created_at: .createdAt, url: .url}'
+
+  # PR review comments (inline code comments)
+  gh api "repos/${REPO}/pulls/{pr_number}/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at, path: .path, line: .line}'
+
+  # PR reviews (approval/request-changes/comment reviews)
+  gh api "repos/${REPO}/pulls/{pr_number}/reviews" --jq '.[] | {user: .user.login, state: .state, body: .body, submitted_at: .submitted_at}'
+
+  Return all comments categorized by type (conversation, review comments, reviews).
+```
+
+```
+[Task subagent_type="general-purpose" description="Fetch linked issue"]
+prompt: |
+  If the PR basic info agent found a linked issue number, fetch that issue's acceptance criteria.
+
+  Wait for PR basic info result, then if issue number exists:
+
+  Use Bash tool to run:
+  gh issue view {issue_number} --json number,title,body
+
+  Parse the body and extract:
+  - Acceptance Criteria section (checkboxes)
+  - Why section
+  - What section
+
+  Return structured acceptance criteria data.
+
+  If no linked issue, return "No linked issue found".
+```
+
+```
+[Task subagent_type="general-purpose" description="Fetch CI status"]
+prompt: |
+  Fetch CI check status for PR #{pr_number}.
+
+  Use Bash tool to run:
+  gh pr checks {pr_number} --json name,state,conclusion
+
+  Categorize results:
+  - Passing checks
+  - Failing checks
+  - Pending checks
+
+  Return structured CI status with failed check names if any.
+```
+
+**Wait for all 4 agents to complete, then consolidate results:**
+
+```
+✅ Stage 1 Complete (X.Xs)
+  ✓ PR info fetched
+  ✓ {N} comments analyzed
+  ✓ Issue #{issue_number} linked
+  ✓ CI status: {passing/failing}
+```
+
+**Handle Stage 1 errors:**
+If any agent fails:
+- Log which agent failed
+- Continue with available data from successful agents
+- Mark missing data clearly in final summary
 </step>
 
-<step name="fetch-comments">
-**Fetch PR and issue comments for feedback analysis:**
+<step name="parse-comments">
+**Parse fetched comments (from Stage 1 results):**
 
-```bash
-# Get repository info
-REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
-
-# PR conversation comments (general discussion on the PR)
-gh pr view 45 --json comments --jq '.comments[] | {user: .author.login, body: .body, created_at: .createdAt, url: .url}'
-
-# PR review comments (inline code comments)
-gh api "repos/${REPO}/pulls/45/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at, path: .path, line: .line, in_reply_to_id: .in_reply_to_id}'
-
-# PR reviews (approval/request-changes/comment reviews)
-gh api "repos/${REPO}/pulls/45/reviews" --jq '.[] | {user: .user.login, state: .state, body: .body, submitted_at: .submitted_at}'
-
-# Linked issue comments (from "Closes #22")
-gh api "repos/${REPO}/issues/22/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at}'
-```
-
-**Parse comments to identify actionable items:**
+Use the comment data from Stage 1 agent to identify actionable items.
 
 Look for:
 - **Automated reviews:** Claude action, linters, security scanners (these are GOLD - they've already done analysis!)
@@ -159,239 +233,391 @@ DON'T re-review those areas manually. Focus on:
 - Comments from unfamiliar/new accounts on sensitive changes
 </step>
 
-<step name="get-full-context">
-**Get full PR context (now informed by comments):**
+<step name="get-diff-and-files">
+**Get PR diff and files list (now informed by Stage 1 data):**
 
 ```bash
 # PR diff
-gh pr diff 45
-
-# CI status
-gh pr checks 45
-
-# Linked issue acceptance criteria (from PR body "Closes #22")
-gh issue view 22 --json body
+gh pr diff {pr_number}
 
 # Files changed
-gh pr view 45 --json additions,deletions,changedFiles,commits
+gh pr view {pr_number} --json additions,deletions,changedFiles,commits
 ```
 
 Parse:
 - Files changed (focus on areas NOT already covered by existing reviews)
-- CI status (check if matches issues mentioned in comments)
-- Acceptance criteria from linked issue
+- Group files by directory/module for parallel review in Stage 2
 </step>
 
-<step name="review-checklist">
-**Review against checklist (use comments as hints, verify critically):**
+<step name="stage-2-parallel-analysis">
+**Stage 2: Parallel Analysis (runs after Stage 1 completes)**
 
-**FIRST: Check what's already been reviewed**
-- If Claude action or bots flagged code quality → Use as hints, but verify critical findings
-- If automated tests found issues → Use those findings as guidance
-- If security scanner ran → Use results, but don't blindly trust for critical security
+Display progress indicator:
+```
+Stage 2/3: Analyzing PR (parallel)
+  → Agent 1: Comment feedback analysis
+  → Agent 2: CI error analysis (if failing)
+  → Agent 3: File review (group 1: models, services)
+  → Agent 4: File review (group 2: controllers, views)
+  → Agent 5: File review (group 3: tests, specs)
+```
 
-**Smart Review Strategy:**
-- **Low-risk findings** (style, conventions) → Trust automated reviews, skip manual check
-- **Medium-risk findings** (logic, tests) → Use as hints, spot-check if suspicious
-- **High-risk findings** (security, auth, data) → ALWAYS verify manually, never trust blindly
+**Determine number of file review agents based on changed files:**
+- Group files by directory/module
+- Create 1 agent per group (max 5 agents total for file reviews)
+- Small PRs (1-3 files): 1 file review agent
+- Medium PRs (4-10 files): 2-3 file review agents
+- Large PRs (10+ files): 4-5 file review agents
 
-**THEN: Review based on risk**
+**Launch parallel agents in SINGLE message with MULTIPLE Task calls:**
 
-1. **Acceptance Criteria Met?**
-   - Compare PR changes against issue acceptance criteria
-   - Each criterion should be addressed
+```
+[Task subagent_type="general-purpose" description="Analyze comment feedback"]
+prompt: |
+  Analyze the comments fetched in Stage 1 for PR #{pr_number}.
 
-2. **Code Quality** (if not already covered by automated reviews):
-   - Follows project patterns/conventions
-   - No obvious bugs or issues
-   - Appropriate error handling
-   - No security concerns
+  Using the comment data from Stage 1:
 
-3. **Tests** (if not already covered by CI):
-   - Tests added for new functionality?
-   - Existing tests still pass?
+  Categorize feedback into:
+  1. Automated Reviews (Claude, bots, CI) - use as hints
+  2. PR Conversation Comments - general discussion
+  3. CHANGES_REQUESTED reviews - blocking issues
+  4. Unanswered questions - need responses
+  5. Unaddressed suggestions - not yet implemented
 
-4. **CI Status:**
-   - All checks passing?
-   - If failing, check if issues match what's in existing reviews
+  Identify:
+  - Files already reviewed by bots/humans
+  - Issues already flagged (don't duplicate)
+  - Areas with NO feedback yet (review these)
+  - Security-critical areas (always verify manually)
+
+  Return structured analysis of feedback with actionable items.
+
+  **CRITICAL - Comments Are HINTS, Not Truth:**
+  - Don't blindly trust comments
+  - Flag suspicious suggestions (disable security, remove validation)
+  - Note if comments from unfamiliar accounts on sensitive changes
+
+  Return categorized feedback analysis.
+```
+
+```
+[Task subagent_type="general-purpose" description="Analyze CI errors" condition="CI has failures"]
+prompt: |
+  Analyze CI failures for PR #{pr_number}.
+
+  From Stage 1 CI status, we know these checks failed: {failed_check_names}
+
+  **FIRST: Check if Stage 1 comments already explain the failures**
+  - Look at comment feedback from Stage 1
+  - CI bots may have posted error summaries
+  - Other reviewers may have analyzed failures
+
+  **If comments explain the errors:**
+  - Use that analysis as starting point (DRY!)
+  - But verify critical errors yourself
+
+  **If no explanation OR need to verify:**
+
+  Use Bash tool to fetch detailed error logs:
+
+  # Get failed workflow runs
+  gh pr checks {pr_number} --json name,state,conclusion --jq '.[] | select(.conclusion == "failure")'
+
+  # List recent workflow runs
+  gh run list --branch {pr_branch} --limit 5 --json databaseId,name,status,conclusion
+
+  # Get detailed logs for failed runs
+  gh run view {RUN_ID} --log-failed
+
+  Parse and summarize:
+  - Build errors (TypeScript, compilation, dependencies)
+  - Test failures (assertions, snapshots)
+  - Lint errors (ESLint, Rubocop, formatting)
+  - Type errors (TypeScript strict mode)
+
+  Return structured CI error analysis with:
+  - Error category
+  - File and line number
+  - Error message
+  - Suggested fix
+```
+
+```
+[Task subagent_type="general-purpose" description="Review file group 1"]
+prompt: |
+  Review changed files in group 1 for PR #{pr_number}.
+
+  Files to review: {file_group_1}
+
+  Context from Stage 1:
+  - Linked issue: #{issue_number}
+  - Acceptance criteria: {acceptance_criteria}
+  - Files already reviewed by bots: {bot_reviewed_files}
+
+  Use Bash tool to get file diffs:
+  gh pr diff {pr_number} -- {file_paths}
+
+  For each file, check:
+  1. **Skip if already reviewed by bots** (unless security-critical)
+  2. **Acceptance Criteria:** Does it address linked issue requirements?
+  3. **Code Quality:** Follows patterns, no obvious bugs, error handling
+  4. **Security:** Auth/validation/SQL/file handling (ALWAYS verify manually)
+  5. **Tests:** New functionality has tests?
+
+  **Smart Review Strategy:**
+  - Low-risk (style, conventions) → Trust bots, skip
+  - Medium-risk (logic, tests) → Use hints, spot-check
+  - High-risk (security, auth, data) → ALWAYS verify manually
+
+  Return findings for this file group with file:line references.
+```
+
+```
+[Task subagent_type="general-purpose" description="Review file group 2"]
+prompt: |
+  Review changed files in group 2 for PR #{pr_number}.
+
+  Files to review: {file_group_2}
+
+  [Same instructions as file group 1 agent]
+
+  Return findings for this file group with file:line references.
+```
+
+```
+[Task subagent_type="general-purpose" description="Review file group 3"]
+prompt: |
+  Review changed files in group 3 for PR #{pr_number}.
+
+  Files to review: {file_group_3}
+
+  [Same instructions as file group 1 agent]
+
+  Return findings for this file group with file:line references.
+```
+
+**Wait for all Stage 2 agents to complete, then consolidate results:**
+
+```
+✅ Stage 2 Complete (X.Xs)
+  ✓ Comment feedback analyzed
+  ✓ CI errors analyzed (if applicable)
+  ✓ {N} file groups reviewed
+```
+
+**Handle Stage 2 errors:**
+If any agent fails:
+- Log which agent failed
+- Continue with results from successful agents
+- Mark missing analysis clearly in final summary
+
+**Consolidate Stage 2 findings:**
+
+Merge results from all agents into single analysis:
+```
+Review Analysis:
+
+Existing Feedback (from comments):
+  • 3 automated reviews found
+  • 2 change requests
+  • 1 unanswered question
+
+CI Status:
+  • 2 checks failing (build, test)
+  • Errors: TypeScript compilation, test assertion
+
+File Review Findings:
+  Group 1 (models, services):
+    ✅ app/models/working_hour.rb - already reviewed by Claude action
+    ⚠️  app/services/availability.rb:45 - edge case missing
+
+  Group 2 (controllers, views):
+    ✅ app/controllers/hours_controller.rb - security ✓
+    ⚠️  app/views/hours/index.html.erb:12 - consider loading state
+
+  Group 3 (tests):
+    ⚠️  spec/models/working_hour_spec.rb - missing overlapping hours test
+```
 </step>
 
-<step name="analyze-ci-errors">
-**If CI checks are failing:**
+<step name="stage-3-quality-checks">
+**Stage 3: Parallel Quality Checks (OPTIONAL - only for complex/high-risk PRs)**
 
-**FIRST: Check if existing comments already explain the CI failures**
-- Look at comments fetched earlier
-- CI bots often post error summaries
-- Other reviewers may have already analyzed the failures
-
-**If comments already explain the errors:**
-- Use that analysis as a starting point (DRY!)
-- But verify critical errors yourself (don't trust blindly)
-- Cross-check comment claims against actual CI logs if suspicious
-
-**If no explanation in comments, OR need to verify, fetch detailed error logs:**
-
-```bash
-# Get failed workflow runs for this PR
-gh pr checks 45 --json name,state,conclusion --jq '.[] | select(.conclusion == "failure")'
-
-# List recent workflow runs for the PR branch
-gh run list --branch feature/22-description --limit 5 --json databaseId,name,status,conclusion
-
-# Get detailed logs for a failed run (replace RUN_ID with actual ID)
-gh run view RUN_ID --log-failed
+Display progress indicator:
+```
+Stage 3/3: Quality checks (parallel) [OPTIONAL]
+  → Agent 1: Code quality deep dive
+  → Agent 2: Security vulnerability scan
+  → Agent 3: Test coverage verification
 ```
 
-**Parse and summarize errors:**
+**Determine if Stage 3 is needed:**
 
-Look for common patterns:
-- **Build errors:** TypeScript/compilation failures, missing dependencies
-- **Test failures:** Failed assertions, snapshot mismatches
-- **Lint errors:** ESLint, Rubocop, formatting issues
-- **Type errors:** TypeScript strict mode violations
+Run Stage 3 if ANY of:
+- PR changes 10+ files
+- PR modifies security-critical code (auth, validation, SQL, file handling)
+- PR has no automated review comments (no bots ran)
+- User explicitly requests deep review
 
-**Display CI Error Summary:**
+**If Stage 3 not needed:**
+```
+ℹ️  Stage 3 skipped (not needed for this PR)
+```
+Skip to summary.
+
+**If Stage 3 needed, launch parallel agents in SINGLE message with MULTIPLE Task calls:**
 
 ```
-CI Errors Detected:
+[Task subagent_type="general-purpose" description="Code quality analysis"]
+prompt: |
+  Perform deep code quality analysis for PR #{pr_number}.
 
-1. build (run #12345) - failed 5 min ago
-   ❌ TypeScript compilation error
-   src/utils/date.ts:45:12
-   Property 'format' does not exist on type 'Date'
+  Focus on files NOT already covered by automated reviews in Stage 2.
 
-   💡 Likely fix: Import date-fns or use toLocaleDateString()
+  Use Read tool to examine files and check:
+  - Code complexity (deeply nested logic, long functions)
+  - Design patterns (appropriate abstractions)
+  - Performance concerns (N+1 queries, inefficient loops)
+  - Maintainability (clear naming, comments where needed)
 
-2. test (run #12346) - failed 5 min ago
-   ❌ 2 tests failed
-
-   FAIL src/components/Button.test.tsx
-   Line 23: Expected "Submit" but received "Submti"
-
-   💡 Likely fix: Typo in Button component text
-
-3. lint (run #12347) - failed 5 min ago
-   ❌ ESLint errors
-
-   src/hooks/useData.ts:12:5
-   'data' is assigned but never used (no-unused-vars)
-
-   💡 Likely fix: Remove unused variable or use it
+  Return code quality findings with specific file:line references.
 ```
 
-**If errors are fixable, offer to resolve:**
-
 ```
-[AskUserQuestion]
-Question: "CI is failing. Want me to analyze and fix these errors?"
-Header: "CI Errors"
-Options:
-- "Yes, fix them (Recommended)" - description: "I'll fix and push to the PR"
-- "Show details only" - description: "Just show me the full logs"
-- "Skip CI analysis" - description: "Continue with review"
-```
+[Task subagent_type="general-purpose" description="Security scan"]
+prompt: |
+  Perform security vulnerability scan for PR #{pr_number}.
 
-**If user chooses to fix:**
+  Use Read tool to examine security-critical files:
+  - Authentication/authorization logic
+  - Input validation/sanitization
+  - SQL queries (injection risks)
+  - File uploads/downloads
+  - API endpoints with sensitive data
+  - Crypto/encryption code
 
-1. **Checkout the PR branch** (don't create a new branch!)
-2. Read the affected files
-3. Apply fixes based on error analysis
-4. Commit with message: `fix(#issue): resolve CI errors - [description]`
-5. Push to PR branch
-6. Wait for CI to re-run (or continue review)
+  Check for:
+  - Missing authentication checks
+  - Unvalidated user input
+  - SQL injection risks
+  - XSS vulnerabilities
+  - Insecure direct object references
+  - Hardcoded secrets/credentials
 
-```bash
-# IMPORTANT: Checkout the existing PR branch (don't create a new branch!)
-gh pr checkout 45
-
-# After fixing, push to the PR branch (this updates the PR)
-git push origin HEAD
-```
-</step>
-
-<step name="examine-changes">
-**Examine key changes (focus on gaps in existing reviews):**
-
-**FIRST: Identify what's NOT covered by existing reviews**
-- Check which files were mentioned in existing comments
-- Check which issues were already flagged by automated reviews
-- Identify areas with NO feedback yet
-
-**THEN: Read ONLY the gaps:**
-
-```bash
-gh pr diff 45 --name-only
+  Return security findings with severity (critical/high/medium/low).
 ```
 
-For files/areas NOT covered by existing reviews, use Read tool to examine:
-- What changed?
-- Does it look correct?
-- Any concerns?
-
-**Example - Efficient review:**
-
 ```
-📝 Gap Analysis:
+[Task subagent_type="general-purpose" description="Test coverage check"]
+prompt: |
+  Verify test coverage for PR #{pr_number}.
 
-Files already reviewed by Claude action:
-  app/models/working_hour.rb - ✅ Issues flagged, no need to re-review
-  app/controllers/hours_controller.rb - ✅ Security checked
+  Use Grep tool to find test files for changed code.
 
-Files NOT yet reviewed (focus here):
-  app/views/working_hours/index.html.erb
-    ✅ Template looks good
-    ⚠️  Line 12: Consider adding loading state
+  Check:
+  - New functionality has corresponding tests?
+  - Tests cover edge cases and error paths?
+  - Tests are clear and maintainable?
 
-  spec/models/working_hour_spec.rb
-    ⚠️  Missing edge case: overlapping hours (not caught by bots)
+  Return test coverage analysis with gaps identified.
 ```
 
-**DRY: Don't repeat what bots/reviewers already found!**
+**Wait for all Stage 3 agents to complete, then consolidate results:**
 
-**BUT: Always verify security-critical areas, even if bots reviewed them:**
-- Authentication/authorization logic
-- Input validation/sanitization
-- SQL queries (injection risks)
-- File uploads/downloads
-- API endpoints with sensitive data
-- Crypto/encryption code
+```
+✅ Stage 3 Complete (X.Xs)
+  ✓ Code quality analyzed
+  ✓ Security scan complete
+  ✓ Test coverage verified
+```
 
-For these areas, treat bot reviews as hints, but always manually verify.
+**Handle Stage 3 errors:**
+If any agent fails:
+- Log which agent failed
+- Continue with results from successful agents
+- Mark missing analysis clearly in final summary
 </step>
 
 <step name="summary">
-**Provide review summary (building on existing reviews):**
+**Provide review summary (consolidating all 3 stages):**
+
+**Show parallel execution timing:**
+```
+⏱️  Parallel Review Complete
+  Stage 1: X.Xs (4 agents)
+  Stage 2: X.Xs (5 agents)
+  Stage 3: X.Xs (3 agents) [if ran]
+  Total: X.Xs
+```
+
+**Show consolidated summary from all stages:**
 
 ```
-🐑 PR Review: #45 feat: Studio Working Hours
+🐑 PR Review: #{pr_number} {pr_title}
 
-Linked Issue: #22
+Linked Issue: #{issue_number}
 
-Existing Reviews Summary:
+📊 Parallel Execution Stats:
+  • Stage 1: 4 agents (PR data fetching)
+  • Stage 2: {N} agents (analysis + file reviews)
+  • Stage 3: {N} agents (quality checks) [if ran]
+  • Total time: X.Xs
+  • Failed agents: {N} [if any]
+
+Existing Reviews Summary (Stage 1):
 🤖 Automated reviews found:
    • Claude action: Code quality ✅, Security ✅
-   • CI: 2 checks failing (TypeScript, tests)
+   • CI: {N} checks failing ({check_names})
 👥 Human reviewers flagged:
-   • @reviewer1: Input validation needed
-   • @reviewer2: Question about approach
+   • @reviewer1: {summary}
+   • @reviewer2: {summary}
 
-Acceptance Criteria:
-✅ Working hours model - implemented in working_hour.rb
-✅ Configuration UI - added views and controller
-✅ Validation rules - validates presence and format
-✅ API endpoint - /api/hours responds correctly
+Comment Feedback Analysis (Stage 2):
+  • {N} automated reviews (use as hints)
+  • {N} change requests
+  • {N} unanswered questions
+  • {N} files already reviewed by bots
+  • {N} files with no feedback yet
 
-Additional Findings (not covered by existing reviews):
-⚠️  View layer: Consider adding loading state
-⚠️  Test coverage: Missing edge case for overlapping hours
+Acceptance Criteria (from linked issue):
+✅ {criterion_1} - implemented in {file}
+✅ {criterion_2} - implemented in {file}
+⏳ {criterion_3} - partially done
+❌ {criterion_4} - not addressed
 
-CI Status:
-❌ 2 checks failing
-   • build - TypeScript error in src/utils/date.ts:45 (flagged by CI bot)
-   • test - 2 tests failed in Button.test.tsx (flagged by CI bot)
+File Review Findings (Stage 2 - parallel):
+  Group 1 (models, services):
+    ✅ app/models/working_hour.rb - already reviewed by bots
+    ⚠️  app/services/availability.rb:45 - edge case missing
+
+  Group 2 (controllers, views):
+    ✅ app/controllers/hours_controller.rb - security ✓
+    ⚠️  app/views/hours/index.html.erb:12 - loading state needed
+
+  Group 3 (tests):
+    ⚠️  spec/models/working_hour_spec.rb - missing overlap test
+
+CI Status (Stage 1 & 2):
+❌ {N} checks failing
+   • build - TypeScript error in src/utils/date.ts:45
+   • test - {N} tests failed in {file}
+
+Quality Checks (Stage 3 - if ran):
+  Code Quality:
+    ⚠️  {file}:{line} - high complexity
+    ✅ No major maintainability issues
+
+  Security:
+    🔴 CRITICAL: {file}:{line} - missing auth check
+    ⚠️  {file}:{line} - unvalidated input
+
+  Test Coverage:
+    ⚠️  {feature} - no tests found
+    ✅ Most changes covered
 
 Unresolved Feedback:
-⚠️  3 items need attention
+⚠️  {N} items need attention
 
 1. @reviewer1 (2 days ago) - CHANGES_REQUESTED
    "Please add input validation for the date field"
@@ -399,8 +625,20 @@ Unresolved Feedback:
 2. @reviewer2 (1 day ago) - Question in conversation
    "Why did you choose this approach over using callbacks?"
 
-3. @claude-action (3 hours ago) - Automated review
-   "Code quality: No issues. Security: Passed."
+Failed Agents (if any):
+⚠️  Stage 2, Agent 3 (file review group 3) - timeout
+    Partial results used. Manual review recommended for: {files}
+```
+
+**If any agents failed, show warning:**
+```
+⚠️  PARTIAL REVIEW - Some agents failed
+
+{N} of {total} agents failed to complete:
+- Stage {X}, Agent {Y}: {failure_reason}
+
+Completed agents provided partial review.
+Consider re-running review or manually checking: {affected_areas}
 ```
 
 **If there's unresolved feedback, highlight it:**
@@ -520,15 +758,50 @@ PR: https://github.com/owner/repo/pull/45
 </process>
 
 <interaction-style>
-- **DRY: Fetch comments FIRST** - Use existing reviews (Claude action, bots, humans) as context
+- **Parallel execution in stages** - Run independent tasks concurrently within each stage
+- **Show clear progress** - Display which agents are running and when stages complete
+- **DRY: Fetch data in Stage 1** - Get all data first, then analyze in Stage 2
 - **Don't duplicate work** - Skip areas already covered by automated reviews
 - **Focus on gaps** - Review what hasn't been covered yet
+- **Handle failures gracefully** - If an agent fails, continue with others and show partial results
 - Be constructive, not nitpicky
 - Focus on acceptance criteria first
 - Highlight security/bug concerns prominently
 - Suggestions vs requirements should be clear
 - Celebrate good work!
 </interaction-style>
+
+<parallel-execution-pattern>
+**CRITICAL: How to run agents in parallel in Claude Code**
+
+To run agents in parallel, you MUST send a SINGLE message with MULTIPLE Task tool calls.
+
+**✅ CORRECT - Single message, multiple tool calls:**
+```
+assistant: "Starting Stage 1 with 4 parallel agents..."
+[Then in a single message, invoke Task tool 4 times]
+
+This runs all 4 agents concurrently.
+```
+
+**❌ WRONG - Separate messages:**
+```
+assistant: "Starting agent 1..."
+[Task call for agent 1]
+
+assistant: "Starting agent 2..."
+[Task call for agent 2]
+
+This runs agents SEQUENTIALLY (slow!)
+```
+
+**Error Handling:**
+If one Task call fails, the others continue. Check each result and handle failures:
+- Log which agent failed
+- Continue with successful results
+- Mark missing data in final summary
+- Suggest manual review for failed areas
+</parallel-execution-pattern>
 
 <efficiency-principle>
 **Why fetch comments first?**
