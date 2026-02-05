@@ -70,6 +70,19 @@ OpenSpec validates:
 - **Correctness**: Implementation matches specs and requirements
 - **Design coherence**: Follows technical design patterns
 
+**After adapter completes, show:**
+```
+🔌 OpenSpec verification complete
+
+✓ All acceptance criteria verified
+✓ Implementation matches specs
+→ Continuing Sheep It workflow...
+
+Next: /sheep:it (to create the PR and ship)
+
+Note: Stay in Sheep It namespace - verification is done
+```
+
 **4. If no adapter or adapter disabled:**
 
 Continue with manual Sheep It verification (get-criteria step).
