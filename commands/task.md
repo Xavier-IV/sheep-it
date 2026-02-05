@@ -73,6 +73,15 @@ args: "{user's task description}"
 OpenSpec will run: `opsx:new` → `opsx:ff` internally.
 After completion, extract the spec and continue to create GitHub issue.
 
+**After OpenSpec completes, show:**
+```
+⚡ OpenSpec spec generation complete
+
+→ Continuing Sheep It workflow: Creating GitHub issue from spec...
+
+Note: When the issue is created, continue with /sheep:start (not /opsx:apply)
+```
+
 **5. Deep mode (--deep flag) with adapter:**
 
 Continue to the existing `deep-research` step below, but also use OpenSpec:
@@ -91,6 +100,15 @@ args: "{user's task description}"
 
 After exploration, OpenSpec will chain to `opsx:new` → `opsx:continue`.
 Extract the spec and continue to create GitHub issue.
+
+**After OpenSpec completes, show:**
+```
+🔬 OpenSpec exploration complete
+
+→ Continuing Sheep It workflow: Creating GitHub issue from research...
+
+Note: When the issue is created, continue with /sheep:start (not /opsx:apply)
+```
 
 **6. If no adapter or adapter disabled:**
 

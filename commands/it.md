@@ -235,6 +235,14 @@ OpenSpec validates:
 - Correctness (implementation matches specs)
 - Design coherence (follows technical design)
 
+**After adapter verify completes, show:**
+```
+🔌 OpenSpec verification complete
+
+✓ Implementation verified
+→ Continuing to archive step...
+```
+
 **4. If no adapter or no verify mapping:**
 
 Skip verification - proceed to archive.
@@ -273,6 +281,16 @@ args: "{issue number or PR context}"
 ```
 
 The adapter handles any cleanup, archiving, or finalization needed.
+
+**After adapter archive completes, show:**
+```
+🔌 OpenSpec archive complete
+
+✓ Spec files archived/cleaned up
+→ Continuing Sheep It workflow: Creating PR...
+
+Note: PR will be created next - stay in Sheep It flow
+```
 
 **4. If no adapter or no archive mapping:**
 

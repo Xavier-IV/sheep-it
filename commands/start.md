@@ -494,6 +494,19 @@ args: "{issue number or context}"
 The adapter will take over the implementation. When it completes,
 Sheep It will continue with verification and completion steps.
 
+**After adapter completes, show:**
+```
+🔌 OpenSpec implementation complete
+
+✓ Code implemented and committed
+→ Continuing Sheep It workflow...
+
+Next: /sheep:verify (to check acceptance criteria)
+      or /sheep:it (to ship the PR)
+
+Note: Stay in Sheep It namespace - don't use /opsx:verify
+```
+
 **5. If no adapter or adapter disabled:**
 
 Continue with the normal sheep:start implementation flow.
