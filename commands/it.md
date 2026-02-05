@@ -214,20 +214,20 @@ adapter:
   enabled: true
   name: "openspec"
   mappings:
-    ship: "openspec:archive"
+    ship: "opsx:archive"
 ```
 
 **3. If adapter found and enabled with ship mapping:**
 
 ```
 🔌 Adapter: Running archive step
-   → /openspec:archive {issue/PR context}
+   → /opsx:archive {issue/PR context}
 ```
 
 **Delegate to adapter skill:**
 ```
 [Skill tool]
-skill: "{adapter.mappings.ship}"  # e.g., "openspec:archive"
+skill: "{adapter.mappings.ship}"  # e.g., "opsx:archive"
 args: "{issue number or PR context}"
 ```
 

@@ -72,7 +72,7 @@ Together, they create a complete workflow: **Sheep It handles Git, adapters hand
 
 | Adapter | Description | Integration |
 |---------|-------------|-------------|
-| **[OpenSpec](https://github.com/Xavier-IV/openspec)** | Structured spec creation with PRDs | `proposal` → `apply` → `archive` |
+| **[OpenSpec](https://github.com/Fission-AI/OpenSpec)** | Structured spec creation with PRDs | `ff` → `apply` → `archive` |
 
 ### How It Works
 
@@ -106,9 +106,9 @@ adapter:
   enabled: true
   name: "openspec"
   mappings:
-    task: "openspec:proposal"    # Spec creation
-    start: "openspec:apply"      # Implementation
-    ship: "openspec:archive"     # Finalization
+    task: "opsx:ff"              # Spec creation
+    start: "opsx:apply"          # Implementation
+    ship: "opsx:archive"         # Finalization
 ```
 
 Adapters are auto-detected from available Claude Code skills. To disable:
@@ -197,9 +197,9 @@ adapter:
   enabled: true
   name: "openspec"
   mappings:
-    task: "openspec:proposal"
-    start: "openspec:apply"
-    ship: "openspec:archive"
+    task: "opsx:ff"
+    start: "opsx:apply"
+    ship: "opsx:archive"
 ```
 
 ## Git Workflow Examples

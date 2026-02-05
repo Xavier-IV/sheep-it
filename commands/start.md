@@ -466,13 +466,13 @@ adapter:
   enabled: true
   name: "openspec"
   mappings:
-    start: "openspec:apply"
+    start: "opsx:apply"
 ```
 
 **3. If no config, auto-detect available adapters:**
 
 Check for common adapter skill patterns:
-- `/openspec:apply` → OpenSpec adapter detected for implementation
+- `/opsx:apply` → OpenSpec adapter detected for implementation
 - Other adapters can be added here
 
 **4. If adapter found and enabled:**
@@ -488,7 +488,7 @@ OpenSpec handles: code implementation
 **Delegate to adapter skill:**
 ```
 [Skill tool]
-skill: "{adapter.mappings.start}"  # e.g., "openspec:apply"
+skill: "{adapter.mappings.start}"  # e.g., "opsx:apply"
 args: "{issue number or context}"
 ```
 
@@ -503,7 +503,7 @@ Continue with the normal sheep:start implementation flow.
 ```
 # If adapter used:
 🔌 Using OpenSpec adapter for implementation
-   → /openspec:apply {issue context}
+   → /opsx:apply {issue context}
 
    Sheep It handled:
    ✓ Branch creation

@@ -131,28 +131,28 @@ Options:
 If "Custom" selected:
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for task creation (e.g., openspec:proposal):"
+Question: "Enter adapter skill for task creation (e.g., opsx:ff):"
 Header: "Task adapter"
 Options:
-- "openspec:proposal (Recommended)" - description: "OpenSpec proposal command"
+- "opsx:ff (Recommended)" - description: "OpenSpec fast-forward command"
 - "None" - description: "Use default sheep:task flow"
 ```
 
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for implementation (e.g., openspec:apply):"
+Question: "Enter adapter skill for implementation (e.g., opsx:apply):"
 Header: "Start adapter"
 Options:
-- "openspec:apply (Recommended)" - description: "OpenSpec apply command"
+- "opsx:apply (Recommended)" - description: "OpenSpec apply command"
 - "None" - description: "Use default sheep:start flow"
 ```
 
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for shipping (e.g., openspec:archive):"
+Question: "Enter adapter skill for shipping (e.g., opsx:archive):"
 Header: "Ship adapter"
 Options:
-- "openspec:archive (Recommended)" - description: "OpenSpec archive command"
+- "opsx:archive (Recommended)" - description: "OpenSpec archive command"
 - "None" - description: "Use default sheep:it flow"
 ```
 </step>
@@ -190,9 +190,9 @@ adapter:
   enabled: true                   # Set to false to disable adapter
   name: "openspec"                # Adapter name (auto-detected if not set)
   mappings:
-    task: "openspec:proposal"     # Skill for spec creation (/sheep:task)
-    start: "openspec:apply"       # Skill for implementation (/sheep:start)
-    ship: "openspec:archive"      # Skill for archiving (/sheep:it)
+    task: "opsx:ff"               # Skill for spec creation (/sheep:task)
+    start: "opsx:apply"           # Skill for implementation (/sheep:start)
+    ship: "opsx:archive"          # Skill for archiving (/sheep:it)
 ```
 
 ```
@@ -240,9 +240,9 @@ adapter:
   enabled: boolean        # Enable/disable adapter integration
   name: string            # Adapter name (e.g., "openspec") - auto-detected if not set
   mappings:
-    task: string          # Skill for spec creation (e.g., "openspec:proposal")
-    start: string         # Skill for implementation (e.g., "openspec:apply")
-    ship: string          # Skill for archiving (e.g., "openspec:archive")
+    task: string          # Skill for spec creation (e.g., "opsx:ff")
+    start: string         # Skill for implementation (e.g., "opsx:apply")
+    ship: string          # Skill for archiving (e.g., "opsx:archive")
 ```
 </config-schema>
 

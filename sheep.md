@@ -95,15 +95,15 @@ Adapters delegate specific workflow steps to external tools while Sheep It handl
 
 | Sheep Command | Adapter Mapping | What Happens |
 |---------------|-----------------|--------------|
-| `/sheep:task` | `task` → `openspec:proposal` | Adapter creates spec, Sheep creates GitHub issue |
-| `/sheep:start` | `start` → `openspec:apply` | Sheep handles branch/assignment, adapter implements |
-| `/sheep:it` | `ship` → `openspec:archive` | Sheep creates PR, adapter archives/cleans up |
+| `/sheep:task` | `task` → `opsx:ff` | Adapter creates spec, Sheep creates GitHub issue |
+| `/sheep:start` | `start` → `opsx:apply` | Sheep handles branch/assignment, adapter implements |
+| `/sheep:it` | `ship` → `opsx:archive` | Sheep creates PR, adapter archives/cleans up |
 
 ### Supported Adapters
 
 | Adapter | Description | Commands |
 |---------|-------------|----------|
-| **OpenSpec** | Structured spec creation and implementation | `proposal`, `apply`, `archive` |
+| **OpenSpec** | Structured spec creation and implementation | `ff`, `apply`, `archive` |
 
 ### Configuration
 
@@ -114,23 +114,23 @@ adapter:
   enabled: true                   # Enable/disable adapter
   name: "openspec"                # Adapter name (auto-detected if not set)
   mappings:
-    task: "openspec:proposal"     # Spec creation
-    start: "openspec:apply"       # Implementation
-    ship: "openspec:archive"      # Archive on ship
+    task: "opsx:ff"               # Spec creation
+    start: "opsx:apply"           # Implementation
+    ship: "opsx:archive"          # Archive on ship
 ```
 
 ### Auto-Detection
 
 If no config is present, Sheep It auto-detects available adapters by checking for
-skill patterns (e.g., `/openspec:proposal`). When detected:
+skill patterns (e.g., `/opsx:ff`). When detected:
 
 ```
 🔌 Adapter detected: OpenSpec
 
 Using OpenSpec for:
-  • Spec creation (sheep:task → openspec:proposal)
-  • Implementation (sheep:start → openspec:apply)
-  • Archive (sheep:it → openspec:archive)
+  • Spec creation (sheep:task → opsx:ff)
+  • Implementation (sheep:start → opsx:apply)
+  • Archive (sheep:it → opsx:archive)
 ```
 
 ### Disabling Adapters

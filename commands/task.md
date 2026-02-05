@@ -49,13 +49,13 @@ adapter:
   enabled: true
   name: "openspec"
   mappings:
-    task: "openspec:proposal"
+    task: "opsx:ff"
 ```
 
 **3. If no config, auto-detect available adapters:**
 
 Check for common adapter skill patterns:
-- `/openspec:proposal` → OpenSpec adapter detected
+- `/opsx:ff` → OpenSpec adapter detected
 - Other adapters can be added here
 
 **4. If adapter found and enabled:**
@@ -70,7 +70,7 @@ Sheep It will create the GitHub issue from the adapter's output.
 **Delegate to adapter skill:**
 ```
 [Skill tool]
-skill: "{adapter.mappings.task}"  # e.g., "openspec:proposal"
+skill: "{adapter.mappings.task}"  # e.g., "opsx:ff"
 args: "{user's task description}"
 ```
 
@@ -89,7 +89,7 @@ Continue with the normal sheep:task flow (understand step).
 ```
 # If adapter used:
 🔌 Using OpenSpec adapter for spec creation
-   → /openspec:proposal "{task description}"
+   → /opsx:ff "{task description}"
 
 # If no adapter:
 📝 Using default Sheep It task flow
