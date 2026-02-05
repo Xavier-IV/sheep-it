@@ -27,17 +27,25 @@ Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.gith
 ```
 Claude asks clarifying questions, refines scope, and creates a GitHub Issue with acceptance criteria. **The issue IS your PRD.**
 
-### Step 2: Claude implements it
+### Step 2: Implement (Hybrid Approach)
+
+**Option A: Adapter-Powered (Recommended)**
 ```
 /sheep:start 22
 ```
-Claude reads the issue as the spec, writes the code, commits incrementally, and auto-checks acceptance criteria as it completes them.
+Sheep It creates the branch and assigns the issue. If you have an adapter configured (like OpenSpec), it delegates implementation to the adapter. Sheep It handles all Git operations: commits, branch management, and tracking.
+
+**Option B: Basic Mode**
+```
+/sheep:start 22
+```
+Without an adapter, Claude implements directly using the issue as the spec. Still gets branch creation, incremental commits, and acceptance criteria tracking.
 
 ### Step 3: Ship it
 ```
 /sheep:it 22
 ```
-Creates a PR linked to the issue. When merged, issue auto-closes. Done.
+Creates a PR linked to the issue, with proper formatting and labels. When merged, issue auto-closes. Done.
 
 ## Why I Built This
 
