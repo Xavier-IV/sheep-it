@@ -198,17 +198,59 @@ gh pr create --draft \
 ```
 </step>
 
-<step name="adapter-archive">
-**Call adapter archive (if configured):**
+<step name="adapter-verify">
+**Call adapter verify (if configured):**
 
-After creating the PR, check if an adapter should handle archiving/cleanup.
+Before archiving, check if an adapter should verify the implementation.
 
 **1. Check for config file:**
 ```bash
 cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
 ```
 
-**2. If adapter has ship mapping:**
+**2. If adapter has verify mapping:**
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  verify: "opsx:verify"
+```
+
+**3. If adapter found and enabled with verify mapping:**
+
+```
+🔌 Adapter: Running verification
+   → /opsx:verify {issue/PR context}
+```
+
+**Delegate to adapter skill:**
+```
+[Skill tool]
+skill: "{adapter.verify}"  # e.g., "opsx:verify"
+args: "{issue number or PR context}"
+```
+
+OpenSpec validates:
+- Completeness (all tasks checked off)
+- Correctness (implementation matches specs)
+- Design coherence (follows technical design)
+
+**4. If no adapter or no verify mapping:**
+
+Skip verification - proceed to archive.
+</step>
+
+<step name="adapter-archive">
+**Call adapter archive (if configured):**
+
+After verification, check if an adapter should handle archiving/cleanup.
+
+**1. Check for config file:**
+```bash
+cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
+```
+
+**2. If adapter has archive mapping:**
 ```yaml
 adapter:
   enabled: true
@@ -216,7 +258,7 @@ adapter:
   archive: "opsx:archive"
 ```
 
-**3. If adapter found and enabled with ship mapping:**
+**3. If adapter found and enabled with archive mapping:**
 
 ```
 🔌 Adapter: Running archive step
@@ -232,7 +274,7 @@ args: "{issue number or PR context}"
 
 The adapter handles any cleanup, archiving, or finalization needed.
 
-**4. If no adapter or no ship mapping:**
+**4. If no adapter or no archive mapping:**
 
 Skip this step - no archive action needed.
 </step>

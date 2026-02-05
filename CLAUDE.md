@@ -75,6 +75,7 @@ adapter:
   quick_mode: "opsx:ff"          # For /sheep:task --quick
   research_mode: "opsx:explore"  # For /sheep:task --deep
   apply: "opsx:apply"            # For /sheep:start
+  verify: "opsx:verify"          # For /sheep:verify (and auto in /sheep:it)
   archive: "opsx:archive"        # For /sheep:it
 ```
 

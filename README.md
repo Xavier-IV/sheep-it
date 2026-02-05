@@ -122,6 +122,7 @@ adapter:
   quick_mode: "opsx:ff"          # Fast spec (/sheep:task --quick)
   research_mode: "opsx:explore"  # Deep research (/sheep:task --deep)
   apply: "opsx:apply"            # Implementation (/sheep:start)
+  verify: "opsx:verify"          # Verification (/sheep:verify, auto in /sheep:it)
   archive: "opsx:archive"        # Finalization (/sheep:it)
 ```
 
@@ -213,6 +214,7 @@ adapter:
   quick_mode: "opsx:ff"          # Fast spec
   research_mode: "opsx:explore"  # Deep research
   apply: "opsx:apply"            # Implementation
+  verify: "opsx:verify"          # Verification
   archive: "opsx:archive"        # Finalization
 ```
 

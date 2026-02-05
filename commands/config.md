@@ -158,6 +158,15 @@ Options:
 
 ```
 [AskUserQuestion]
+Question: "Enter adapter skill for verification (/sheep:verify):"
+Header: "Verification"
+Options:
+- "opsx:verify (Recommended)" - description: "OpenSpec verify command (auto-runs in /sheep:it)"
+- "None" - description: "Skip verification step"
+```
+
+```
+[AskUserQuestion]
 Question: "Enter adapter skill for finalization (/sheep:it):"
 Header: "Finalization"
 Options:
@@ -201,6 +210,7 @@ adapter:
   quick_mode: "opsx:ff"           # Fast spec for /sheep:task --quick
   research_mode: "opsx:explore"   # Deep research for /sheep:task --deep
   apply: "opsx:apply"             # Implementation for /sheep:start
+  verify: "opsx:verify"           # Verification for /sheep:verify (auto in /sheep:it)
   archive: "opsx:archive"         # Finalization for /sheep:it
 ```
 
@@ -212,7 +222,7 @@ Settings:
   Commits: Conventional (feat:, fix:, etc.)
   Labels: enhancement, bug, chore
   Auto-update: ✅ checkboxes, ✅ comments
-  Adapter: openspec (--quick → ff, --deep → explore, start → apply, ship → archive)
+  Adapter: openspec (--quick → ff, --deep → explore, start → apply, verify → verify, ship → archive)
 
 💡 Tip: Commit this file to share settings with your team.
 ```
@@ -251,6 +261,7 @@ adapter:
   quick_mode: string      # Skill for fast spec (e.g., "opsx:ff")
   research_mode: string   # Skill for deep research (e.g., "opsx:explore")
   apply: string           # Skill for implementation (e.g., "opsx:apply")
+  verify: string          # Skill for verification (e.g., "opsx:verify")
   archive: string         # Skill for finalization (e.g., "opsx:archive")
 ```
 </config-schema>

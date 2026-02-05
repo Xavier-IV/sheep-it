@@ -10,11 +10,13 @@ allowed-tools:
   - Bash(bundle exec *)
   - Bash(pytest *)
   - Bash(go test *)
+  - Bash(cat .sheeprc.yml *)
   - Read
   - Glob
   - Grep
   - AskUserQuestion
   - Task
+  - Skill
 ---
 
 <objective>
@@ -30,6 +32,48 @@ Run tests, check functionality, and update the issue checkboxes.
 </usage>
 
 <process>
+
+<step name="detect-adapter">
+**Check for adapter verification:**
+
+Before starting manual verification, check if an adapter should handle it.
+
+**1. Check for config file:**
+```bash
+cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
+```
+
+**2. If adapter has verify mapping:**
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  verify: "opsx:verify"
+```
+
+**3. If adapter found and enabled:**
+
+```
+🔌 Adapter verification: OpenSpec
+   → /opsx:verify {issue context}
+```
+
+**Delegate to adapter:**
+```
+[Skill tool]
+skill: "{adapter.verify}"  # e.g., "opsx:verify"
+args: "{issue number or context}"
+```
+
+OpenSpec validates:
+- **Completeness**: All tasks/acceptance criteria checked off
+- **Correctness**: Implementation matches specs and requirements
+- **Design coherence**: Follows technical design patterns
+
+**4. If no adapter or adapter disabled:**
+
+Continue with manual Sheep It verification (get-criteria step).
+</step>
 
 <step name="get-criteria">
 **Get acceptance criteria from issue:**

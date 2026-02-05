@@ -99,7 +99,8 @@ Adapters delegate specific workflow steps to external tools while Sheep It handl
 | `/sheep:task --quick` | `quick_mode` → `opsx:ff` | Fast spec generation → GitHub issue |
 | `/sheep:task --deep` | `research_mode` → `opsx:explore` | Deep research → GitHub issue |
 | `/sheep:start` | `apply` → `opsx:apply` | Sheep handles branch/assignment, adapter implements |
-| `/sheep:it` | `archive` → `opsx:archive` | Sheep creates PR, adapter archives/cleans up |
+| `/sheep:verify` | `verify` → `opsx:verify` | Adapter validates implementation (optional, manual) |
+| `/sheep:it` | `verify` + `archive` → `opsx:verify` + `opsx:archive` | Verify, then create PR and archive |
 
 ### Supported Adapters
 
@@ -118,6 +119,7 @@ adapter:
   quick_mode: "opsx:ff"           # Fast spec for --quick
   research_mode: "opsx:explore"   # Deep research for --deep
   apply: "opsx:apply"             # Implementation
+  verify: "opsx:verify"           # Verification (manual or auto in /sheep:it)
   archive: "opsx:archive"         # Finalization
 ```
 
@@ -133,7 +135,8 @@ Using OpenSpec for:
   • Quick mode (/sheep:task --quick → opsx:ff)
   • Research mode (/sheep:task --deep → opsx:explore)
   • Implementation (/sheep:start → opsx:apply)
-  • Finalization (/sheep:it → opsx:archive)
+  • Verification (/sheep:verify → opsx:verify)
+  • Finalization (/sheep:it → opsx:verify + opsx:archive)
 ```
 
 ### Disabling Adapters

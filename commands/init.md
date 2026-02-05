@@ -186,6 +186,7 @@ adapter:
   quick_mode: "opsx:ff"          # Fast spec for --quick
   research_mode: "opsx:explore"  # Deep research for --deep
   apply: "opsx:apply"            # Implementation
+  verify: "opsx:verify"          # Verification
   archive: "opsx:archive"        # Finalization
 ```
 
@@ -234,7 +235,8 @@ Route to selected commands in order: milestone → task → config.
    /sheep:task --quick → /opsx:ff
    /sheep:task --deep  → /opsx:explore
    /sheep:start        → /opsx:apply
-   /sheep:it           → /opsx:archive
+   /sheep:verify       → /opsx:verify
+   /sheep:it           → /opsx:verify + /opsx:archive
 ```
 </step>
 
