@@ -41,6 +41,7 @@ Options (multiSelect: true):
 - "Commit style" - description: "Conventional commits, etc."
 - "Labels" - description: "Default labels for issues"
 - "Auto-update issues" - description: "Check boxes and add comments"
+- "Adapter integration" - description: "Connect external workflow tools (e.g., OpenSpec)"
 ```
 </step>
 
@@ -111,6 +112,51 @@ Options (multiSelect: true):
 ```
 </step>
 
+<step name="adapter-config">
+**Adapter integration:**
+
+Adapters allow Sheep It to delegate parts of its workflow to external tools like OpenSpec.
+
+```
+[AskUserQuestion]
+Question: "Configure workflow adapter?"
+Header: "Adapter"
+Options:
+- "Auto-detect (Recommended)" - description: "Automatically detect available adapters (e.g., /openspec:*)"
+- "OpenSpec" - description: "Use OpenSpec for spec creation and implementation"
+- "Custom" - description: "Define custom adapter mappings"
+- "Disabled" - description: "Don't use any adapter"
+```
+
+If "Custom" selected:
+```
+[AskUserQuestion]
+Question: "Enter adapter skill for task creation (e.g., openspec:proposal):"
+Header: "Task adapter"
+Options:
+- "openspec:proposal (Recommended)" - description: "OpenSpec proposal command"
+- "None" - description: "Use default sheep:task flow"
+```
+
+```
+[AskUserQuestion]
+Question: "Enter adapter skill for implementation (e.g., openspec:apply):"
+Header: "Start adapter"
+Options:
+- "openspec:apply (Recommended)" - description: "OpenSpec apply command"
+- "None" - description: "Use default sheep:start flow"
+```
+
+```
+[AskUserQuestion]
+Question: "Enter adapter skill for shipping (e.g., openspec:archive):"
+Header: "Ship adapter"
+Options:
+- "openspec:archive (Recommended)" - description: "OpenSpec archive command"
+- "None" - description: "Use default sheep:it flow"
+```
+</step>
+
 <step name="save">
 **Save configuration:**
 
@@ -137,6 +183,16 @@ labels:
 auto_update:
   check_criteria: true
   progress_comments: true
+
+# Adapter integration (optional)
+# Delegates workflow steps to external tools like OpenSpec
+adapter:
+  enabled: true                   # Set to false to disable adapter
+  name: "openspec"                # Adapter name (auto-detected if not set)
+  mappings:
+    task: "openspec:proposal"     # Skill for spec creation (/sheep:task)
+    start: "openspec:apply"       # Skill for implementation (/sheep:start)
+    ship: "openspec:archive"      # Skill for archiving (/sheep:it)
 ```
 
 ```
@@ -147,6 +203,7 @@ Settings:
   Commits: Conventional (feat:, fix:, etc.)
   Labels: enhancement, bug, chore
   Auto-update: ✅ checkboxes, ✅ comments
+  Adapter: openspec (task → proposal, start → apply, ship → archive)
 
 💡 Tip: Commit this file to share settings with your team.
 ```
@@ -178,6 +235,14 @@ auto_update:
 
 project:
   board: string           # GitHub Project name (auto-detected if not set)
+
+adapter:
+  enabled: boolean        # Enable/disable adapter integration
+  name: string            # Adapter name (e.g., "openspec") - auto-detected if not set
+  mappings:
+    task: string          # Skill for spec creation (e.g., "openspec:proposal")
+    start: string         # Skill for implementation (e.g., "openspec:apply")
+    ship: string          # Skill for archiving (e.g., "openspec:archive")
 ```
 </config-schema>
 
