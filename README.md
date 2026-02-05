@@ -204,15 +204,22 @@ adapter:
 
 ## Philosophy
 
-GitHub already has all the infrastructure for project management. Sheep It just connects the dots:
+**Git-first workflow orchestration.** GitHub already has all the infrastructure: issues, PRs, milestones, projects. Sheep It orchestrates the Git workflow around these primitives:
 
 - **Issues** → Your PRD / spec
-- **Milestones** → Version planning
+- **Branches** → Feature isolation (auto-created, convention-based)
+- **Commits** → Incremental progress (atomic, traceable to issues)
+- **PRs** → Code review and shipping (formatted, linked, labeled)
+- **Releases** → Version milestones (automated from tags)
 - **Projects** → Kanban board
-- **Checkboxes** → Acceptance criteria (auto-updated!)
-- **Git state** → Progress tracking
+- **Git state** → Single source of truth for progress
 
-Keep it simple. Use what's already there.
+**Separation of concerns:**
+- **Sheep It** → Git workflow orchestration
+- **Adapters** → Implementation strategy (optional)
+- **GitHub** → Single source of truth
+
+Keep it simple. Use what's already there. Focus on the workflow, not the tooling.
 
 ---
 
