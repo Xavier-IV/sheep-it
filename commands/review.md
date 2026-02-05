@@ -59,28 +59,20 @@ Options:
 ```
 </step>
 
-<step name="get-context">
-**Get PR and linked issue context:**
+<step name="get-basic-info">
+**Get basic PR information:**
 
 ```bash
-# PR details
-gh pr view 45 --json number,title,body,additions,deletions,changedFiles,commits
+# PR details (basic info only)
+gh pr view 45 --json number,title,body,author
 
-# PR diff
-gh pr diff 45
-
-# CI status
-gh pr checks 45
-
-# Linked issue (from PR body "Closes #22")
-gh issue view 22 --json body
+# Linked issue number (from PR body "Closes #22")
+# Parse the issue number from PR body
 ```
 
 Parse:
 - What the PR claims to do
-- Acceptance criteria from linked issue
-- Files changed
-- CI status
+- Linked issue number (if any)
 </step>
 
 <step name="fetch-comments">
@@ -106,6 +98,7 @@ gh api "repos/${REPO}/issues/22/comments" --jq '.[] | {user: .user.login, body: 
 **Parse comments to identify actionable items:**
 
 Look for:
+- **Automated reviews:** Claude action, linters, security scanners (these are GOLD - they've already done analysis!)
 - **Questions:** Comments containing `?` or phrases like "why", "how", "could you explain"
 - **Change requests:** Comments with phrases like "please", "should", "must", "need to", "consider"
 - **Unresolved threads:** PR comments without replies, or threads still marked unresolved
@@ -115,49 +108,101 @@ Look for:
 **Categorize feedback:**
 
 ```
-Actionable Feedback Analysis:
+Existing Review Analysis:
 
-1. PR Conversation Comments:
-   - General discussion, questions, or feedback in the conversation tab
-   - May include automated comments from bots/CI or human reviewers
+1. Automated Reviews (Claude, bots, CI):
+   - Code quality issues already identified
+   - Security concerns flagged
+   - Test failures reported
+   🎯 USE THIS - Don't duplicate work!
 
-2. CHANGES_REQUESTED reviews:
+2. PR Conversation Comments:
+   - General discussion, questions, or feedback
+   - May include actionable items
+
+3. CHANGES_REQUESTED reviews:
    - User, date, and summary of requested changes
 
-3. Unanswered questions:
+4. Unanswered questions:
    - Questions from reviewers without responses
 
-4. Unaddressed suggestions:
-   - Specific change requests that may not be implemented
-
-5. Recent discussion:
-   - Any comments in the last 24-48 hours that may need attention
+5. Unaddressed suggestions:
+   - Specific change requests not yet implemented
 ```
+
+**IMPORTANT - DRY Principle:**
+If existing reviews (especially automated ones) have already identified issues,
+DON'T re-review those areas manually. Focus on:
+- Areas not yet covered by existing reviews
+- Verifying fixes for issues already raised
+- New perspectives not covered by bots
+</step>
+
+<step name="get-full-context">
+**Get full PR context (now informed by comments):**
+
+```bash
+# PR diff
+gh pr diff 45
+
+# CI status
+gh pr checks 45
+
+# Linked issue acceptance criteria (from PR body "Closes #22")
+gh issue view 22 --json body
+
+# Files changed
+gh pr view 45 --json additions,deletions,changedFiles,commits
+```
+
+Parse:
+- Files changed (focus on areas NOT already covered by existing reviews)
+- CI status (check if matches issues mentioned in comments)
+- Acceptance criteria from linked issue
 </step>
 
 <step name="review-checklist">
-**Review against checklist:**
+**Review against checklist (skip areas already covered by existing reviews):**
+
+**FIRST: Check what's already been reviewed**
+- If Claude action or bots flagged code quality → Skip manual code quality check
+- If automated tests found issues → Use those findings, don't re-analyze
+- If security scanner ran → Don't duplicate security review
+
+**THEN: Review gaps only**
 
 1. **Acceptance Criteria Met?**
    - Compare PR changes against issue acceptance criteria
    - Each criterion should be addressed
 
-2. **Code Quality:**
+2. **Code Quality** (if not already covered by automated reviews):
    - Follows project patterns/conventions
    - No obvious bugs or issues
    - Appropriate error handling
    - No security concerns
 
-3. **Tests:**
+3. **Tests** (if not already covered by CI):
    - Tests added for new functionality?
    - Existing tests still pass?
 
 4. **CI Status:**
    - All checks passing?
+   - If failing, check if issues match what's in existing reviews
 </step>
 
 <step name="analyze-ci-errors">
-**If CI checks are failing, fetch detailed error logs:**
+**If CI checks are failing:**
+
+**FIRST: Check if existing comments already explain the CI failures**
+- Look at comments fetched earlier
+- CI bots often post error summaries
+- Other reviewers may have already analyzed the failures
+
+**If comments already explain the errors:**
+- Use that analysis (DRY!)
+- Focus on verifying if fixes are needed
+
+**If no explanation in comments, fetch detailed error logs:**
 
 ```bash
 # Get failed workflow runs for this PR
@@ -238,45 +283,60 @@ git push origin HEAD
 </step>
 
 <step name="examine-changes">
-**Examine key changes:**
+**Examine key changes (focus on gaps in existing reviews):**
 
-Read the most important changed files:
+**FIRST: Identify what's NOT covered by existing reviews**
+- Check which files were mentioned in existing comments
+- Check which issues were already flagged by automated reviews
+- Identify areas with NO feedback yet
+
+**THEN: Read ONLY the gaps:**
 
 ```bash
 gh pr diff 45 --name-only
 ```
 
-For each significant file, use Read tool to examine:
+For files/areas NOT covered by existing reviews, use Read tool to examine:
 - What changed?
 - Does it look correct?
 - Any concerns?
 
+**Example - Efficient review:**
+
 ```
-📝 Reviewing Changes:
+📝 Gap Analysis:
 
-app/models/working_hour.rb
-  ✅ Model looks good
-  ✅ Validations present
-  ⚠️  Line 45: Consider adding index for date column
+Files already reviewed by Claude action:
+  app/models/working_hour.rb - ✅ Issues flagged, no need to re-review
+  app/controllers/hours_controller.rb - ✅ Security checked
 
-app/controllers/hours_controller.rb
-  ✅ CRUD actions implemented
-  ✅ Strong params used
-  ✅ Authorization checks present
+Files NOT yet reviewed (focus here):
+  app/views/working_hours/index.html.erb
+    ✅ Template looks good
+    ⚠️  Line 12: Consider adding loading state
 
-spec/models/working_hour_spec.rb
-  ✅ Tests cover main scenarios
-  ⚠️  Missing edge case: overlapping hours
+  spec/models/working_hour_spec.rb
+    ⚠️  Missing edge case: overlapping hours (not caught by bots)
 ```
+
+**DRY: Don't repeat what bots/reviewers already found!**
 </step>
 
 <step name="summary">
-**Provide review summary:**
+**Provide review summary (building on existing reviews):**
 
 ```
 🐑 PR Review: #45 feat: Studio Working Hours
 
 Linked Issue: #22
+
+Existing Reviews Summary:
+🤖 Automated reviews found:
+   • Claude action: Code quality ✅, Security ✅
+   • CI: 2 checks failing (TypeScript, tests)
+👥 Human reviewers flagged:
+   • @reviewer1: Input validation needed
+   • @reviewer2: Question about approach
 
 Acceptance Criteria:
 ✅ Working hours model - implemented in working_hour.rb
@@ -284,20 +344,14 @@ Acceptance Criteria:
 ✅ Validation rules - validates presence and format
 ✅ API endpoint - /api/hours responds correctly
 
-Code Quality:
-✅ Follows Rails conventions
-✅ No security issues found
-⚠️  Suggestion: Add database index for date column
+Additional Findings (not covered by existing reviews):
+⚠️  View layer: Consider adding loading state
+⚠️  Test coverage: Missing edge case for overlapping hours
 
-Tests:
-✅ Model specs added
-⚠️  Missing: Controller specs
-
-CI: ✅ All checks passing
-    (or)
-CI: ❌ 2 checks failing
-   • build - TypeScript error in src/utils/date.ts:45
-   • test - 2 tests failed in Button.test.tsx
+CI Status:
+❌ 2 checks failing
+   • build - TypeScript error in src/utils/date.ts:45 (flagged by CI bot)
+   • test - 2 tests failed in Button.test.tsx (flagged by CI bot)
 
 Unresolved Feedback:
 ⚠️  3 items need attention
@@ -308,8 +362,8 @@ Unresolved Feedback:
 2. @reviewer2 (1 day ago) - Question in conversation
    "Why did you choose this approach over using callbacks?"
 
-3. @claude (3 hours ago) - Comment
-   "Code review: No issues found. Checked for bugs and CLAUDE.md compliance."
+3. @claude-action (3 hours ago) - Automated review
+   "Code quality: No issues. Security: Passed."
 ```
 
 **If there's unresolved feedback, highlight it:**
@@ -429,9 +483,24 @@ PR: https://github.com/owner/repo/pull/45
 </process>
 
 <interaction-style>
+- **DRY: Fetch comments FIRST** - Use existing reviews (Claude action, bots, humans) as context
+- **Don't duplicate work** - Skip areas already covered by automated reviews
+- **Focus on gaps** - Review what hasn't been covered yet
 - Be constructive, not nitpicky
 - Focus on acceptance criteria first
 - Highlight security/bug concerns prominently
 - Suggestions vs requirements should be clear
 - Celebrate good work!
 </interaction-style>
+
+<efficiency-principle>
+**Why fetch comments first?**
+
+1. **Automated reviews are gold** - Claude action, linters, security scanners have already analyzed the code
+2. **Avoid duplicate work** - Don't waste tokens re-reviewing what bots already found
+3. **Build on existing context** - Use prior feedback to inform your review
+4. **DRY principle** - Don't Repeat Yourself applies to reviews too!
+
+**Flow:**
+Comments → Understand what's covered → Review only the gaps → Efficient!
+</efficiency-principle>
