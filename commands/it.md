@@ -213,8 +213,7 @@ cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    ship: "opsx:archive"
+  archive: "opsx:archive"
 ```
 
 **3. If adapter found and enabled with ship mapping:**
@@ -227,7 +226,7 @@ adapter:
 **Delegate to adapter skill:**
 ```
 [Skill tool]
-skill: "{adapter.mappings.ship}"  # e.g., "opsx:archive"
+skill: "{adapter.archive}"  # e.g., "opsx:archive"
 args: "{issue number or PR context}"
 ```
 

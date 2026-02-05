@@ -72,10 +72,10 @@ auto_update:
 adapter:
   enabled: true                  # Enable adapter integration
   name: "openspec"               # Adapter name
-  mappings:
-    task: "opsx:ff"              # Spec creation
-    start: "opsx:apply"          # Implementation
-    ship: "opsx:archive"         # Finalization
+  quick_mode: "opsx:ff"          # For /sheep:task --quick
+  research_mode: "opsx:explore"  # For /sheep:task --deep
+  apply: "opsx:apply"            # For /sheep:start
+  archive: "opsx:archive"        # For /sheep:it
 ```
 
 ### `.claude/settings.local.json` (User Permissions)
@@ -132,8 +132,9 @@ Skills check for adapters before proceeding:
 ```
 
 Example in `task.md`:
-- Detects OpenSpec via config or skill availability
-- Delegates spec creation: `Skill(tool: "opsx:ff")`
+- Default mode: Pure Sheep It brainstorming (no adapter)
+- `--quick` mode: Delegates to OpenSpec `opsx:ff` for fast spec generation
+- `--deep` mode: Delegates to OpenSpec `opsx:explore` for research
 - Takes adapter output and creates GitHub issue
 
 ### YOLO Mode Safety

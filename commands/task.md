@@ -25,9 +25,9 @@ Use AskUserQuestion tool for all clarifications - make it feel like a collaborat
 
 <usage>
 ```
-/sheep:task "Add user login"      # Start brainstorming with initial idea
-/sheep:task                       # Start from scratch
-/sheep:task "Add payments" --deep # Deep research before creating issue
+/sheep:task "Add user login"        # Interactive brainstorm (default, no adapter)
+/sheep:task "Add profile" --quick   # Fast spec with OpenSpec (opsx:ff)
+/sheep:task "Add payments" --deep   # Deep research with OpenSpec (opsx:explore)
 ```
 </usage>
 
@@ -48,51 +48,66 @@ cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "opsx:ff"
+  quick_mode: "opsx:ff"       # For --quick flag
+  research_mode: "opsx:explore"  # For --deep flag
 ```
 
-**3. If no config, auto-detect available adapters:**
+**3. Determine which mode to use:**
 
-Check for common adapter skill patterns:
-- `/opsx:ff` → OpenSpec adapter detected
-- Other adapters can be added here
+- **No flag (default):** Pure Sheep It, no adapter (skip to understand step)
+- **`--quick` flag:** Use adapter's `quick_mode` (opsx:ff)
+- **`--deep` flag:** Use adapter's `research_mode` (opsx:explore)
 
-**4. If adapter found and enabled:**
+**4. If `--quick` flag and adapter enabled:**
 
 ```
-🔌 Adapter detected: OpenSpec
-
-The OpenSpec adapter will handle spec creation.
-Sheep It will create the GitHub issue from the adapter's output.
+🔌 Quick mode: Using OpenSpec for fast spec generation
+   → /opsx:ff (new + all artifacts at once)
 ```
 
-**Delegate to adapter skill:**
+**Delegate to adapter:**
 ```
 [Skill tool]
-skill: "{adapter.mappings.task}"  # e.g., "opsx:ff"
+skill: "opsx:ff"
 args: "{user's task description}"
 ```
 
-**5. After adapter returns:**
+OpenSpec will run: `opsx:new` → `opsx:ff` internally.
+After completion, extract the spec and continue to create GitHub issue.
 
-The adapter should return a structured spec. Use this to:
-- Extract title, description, acceptance criteria
-- Continue to the "structure" step with adapter's output
-- Create GitHub issue as normal
+**5. If `--deep` flag and adapter enabled:**
 
-**6. If no adapter or adapter disabled:**
+Continue to the existing `deep-research` step below, but also use OpenSpec:
+
+```
+🔌 Research mode: Using OpenSpec for exploration
+   → /opsx:explore (investigate before committing)
+```
+
+**Delegate to adapter:**
+```
+[Skill tool]
+skill: "opsx:explore"
+args: "{user's task description}"
+```
+
+After exploration, OpenSpec will chain to `opsx:new` → `opsx:continue`.
+Extract the spec and continue to create GitHub issue.
+
+**6. If no flag or adapter disabled:**
 
 Continue with the normal sheep:task flow (understand step).
 
-**Show adapter status:**
+**Show mode status:**
 ```
-# If adapter used:
-🔌 Using OpenSpec adapter for spec creation
-   → /opsx:ff "{task description}"
+# Default mode:
+📝 Interactive mode - Sheep It brainstorming
 
-# If no adapter:
-📝 Using default Sheep It task flow
+# Quick mode:
+⚡ Quick mode - Fast OpenSpec spec generation
+
+# Deep mode:
+🔬 Research mode - OpenSpec exploration + planning
 ```
 </step>
 

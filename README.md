@@ -21,11 +21,25 @@ Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.gith
 
 ## See It In Action
 
-### Step 1: Brainstorm a task
+### Step 1: Create a task (Three modes)
+
+**Default: Interactive brainstorming**
 ```
 /sheep:task "Add user login"
 ```
-Claude asks clarifying questions, refines scope, and creates a GitHub Issue with acceptance criteria. **The issue IS your PRD.**
+Claude asks clarifying questions, refines scope, creates a GitHub Issue. Pure Sheep It, no adapter needed.
+
+**Quick: Fast spec with OpenSpec**
+```
+/sheep:task "Add user profile" --quick
+```
+Minimal questions → OpenSpec generates complete spec (proposal, specs, design) → GitHub Issue. Best for clear requirements.
+
+**Deep: Research mode with OpenSpec**
+```
+/sheep:task "Add payments" --deep
+```
+Parallel research agents → OpenSpec exploration → Detailed spec → GitHub Issue. Best for complex features.
 
 ### Step 2: Implement (Hybrid Approach)
 
@@ -72,7 +86,7 @@ Together, they create a complete workflow: **Sheep It handles Git, adapters hand
 
 | Adapter | Description | Integration |
 |---------|-------------|-------------|
-| **[OpenSpec](https://github.com/Fission-AI/OpenSpec)** | Structured spec creation with PRDs | `ff` → `apply` → `archive` |
+| **[OpenSpec](https://github.com/Fission-AI/OpenSpec)** | Structured spec creation with PRDs | Quick: `ff` / Research: `explore` → `apply` → `archive` |
 
 ### How It Works
 
@@ -105,10 +119,10 @@ Add to `.sheeprc.yml`:
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "opsx:ff"              # Spec creation
-    start: "opsx:apply"          # Implementation
-    ship: "opsx:archive"         # Finalization
+  quick_mode: "opsx:ff"          # Fast spec (/sheep:task --quick)
+  research_mode: "opsx:explore"  # Deep research (/sheep:task --deep)
+  apply: "opsx:apply"            # Implementation (/sheep:start)
+  archive: "opsx:archive"        # Finalization (/sheep:it)
 ```
 
 Adapters are auto-detected from available Claude Code skills. To disable:
@@ -196,10 +210,10 @@ auto_update:
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "opsx:ff"
-    start: "opsx:apply"
-    ship: "opsx:archive"
+  quick_mode: "opsx:ff"          # Fast spec
+  research_mode: "opsx:explore"  # Deep research
+  apply: "opsx:apply"            # Implementation
+  archive: "opsx:archive"        # Finalization
 ```
 
 ## Git Workflow Examples

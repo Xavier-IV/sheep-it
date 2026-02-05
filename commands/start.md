@@ -465,8 +465,7 @@ cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    start: "opsx:apply"
+  apply: "opsx:apply"
 ```
 
 **3. If no config, auto-detect available adapters:**
@@ -488,7 +487,7 @@ OpenSpec handles: code implementation
 **Delegate to adapter skill:**
 ```
 [Skill tool]
-skill: "{adapter.mappings.start}"  # e.g., "opsx:apply"
+skill: "{adapter.apply}"  # e.g., "opsx:apply"
 args: "{issue number or context}"
 ```
 

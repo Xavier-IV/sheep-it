@@ -183,10 +183,10 @@ If "Yes, enable adapter":
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "opsx:ff"
-    start: "opsx:apply"
-    ship: "opsx:archive"
+  quick_mode: "opsx:ff"          # Fast spec for --quick
+  research_mode: "opsx:explore"  # Deep research for --deep
+  apply: "opsx:apply"            # Implementation
+  archive: "opsx:archive"        # Finalization
 ```
 
 If no adapter detected, skip this step silently.
@@ -231,9 +231,10 @@ Route to selected commands in order: milestone → task → config.
 **If adapter was configured, also show:**
 ```
 🔌 Adapter Integration:
-   /sheep:task  → /opsx:ff
-   /sheep:start → /opsx:apply
-   /sheep:it    → /opsx:archive
+   /sheep:task --quick → /opsx:ff
+   /sheep:task --deep  → /opsx:explore
+   /sheep:start        → /opsx:apply
+   /sheep:it           → /opsx:archive
 ```
 </step>
 

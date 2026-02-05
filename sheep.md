@@ -95,15 +95,17 @@ Adapters delegate specific workflow steps to external tools while Sheep It handl
 
 | Sheep Command | Adapter Mapping | What Happens |
 |---------------|-----------------|--------------|
-| `/sheep:task` | `task` → `opsx:ff` | Adapter creates spec, Sheep creates GitHub issue |
-| `/sheep:start` | `start` → `opsx:apply` | Sheep handles branch/assignment, adapter implements |
-| `/sheep:it` | `ship` → `opsx:archive` | Sheep creates PR, adapter archives/cleans up |
+| `/sheep:task` (default) | None | Pure Sheep It brainstorming → GitHub issue |
+| `/sheep:task --quick` | `quick_mode` → `opsx:ff` | Fast spec generation → GitHub issue |
+| `/sheep:task --deep` | `research_mode` → `opsx:explore` | Deep research → GitHub issue |
+| `/sheep:start` | `apply` → `opsx:apply` | Sheep handles branch/assignment, adapter implements |
+| `/sheep:it` | `archive` → `opsx:archive` | Sheep creates PR, adapter archives/cleans up |
 
 ### Supported Adapters
 
 | Adapter | Description | Commands |
 |---------|-------------|----------|
-| **OpenSpec** | Structured spec creation and implementation | `ff`, `apply`, `archive` |
+| **OpenSpec** | Structured spec creation and implementation | Quick: `ff` / Research: `explore`, then `apply`, then `archive` |
 
 ### Configuration
 
@@ -113,10 +115,10 @@ Adapters can be auto-detected or explicitly configured in `.sheeprc.yml`:
 adapter:
   enabled: true                   # Enable/disable adapter
   name: "openspec"                # Adapter name (auto-detected if not set)
-  mappings:
-    task: "opsx:ff"               # Spec creation
-    start: "opsx:apply"           # Implementation
-    ship: "opsx:archive"          # Archive on ship
+  quick_mode: "opsx:ff"           # Fast spec for --quick
+  research_mode: "opsx:explore"   # Deep research for --deep
+  apply: "opsx:apply"             # Implementation
+  archive: "opsx:archive"         # Finalization
 ```
 
 ### Auto-Detection
@@ -128,9 +130,10 @@ skill patterns (e.g., `/opsx:ff`). When detected:
 🔌 Adapter detected: OpenSpec
 
 Using OpenSpec for:
-  • Spec creation (sheep:task → opsx:ff)
-  • Implementation (sheep:start → opsx:apply)
-  • Archive (sheep:it → opsx:archive)
+  • Quick mode (/sheep:task --quick → opsx:ff)
+  • Research mode (/sheep:task --deep → opsx:explore)
+  • Implementation (/sheep:start → opsx:apply)
+  • Finalization (/sheep:it → opsx:archive)
 ```
 
 ### Disabling Adapters
