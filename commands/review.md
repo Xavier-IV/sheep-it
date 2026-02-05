@@ -12,7 +12,12 @@ allowed-tools:
   - Bash(gh api repos/*/issues/*/comments*)
   - Bash(gh run list *)
   - Bash(gh run view *)
+  - Bash(git push origin *)
+  - Bash(git add *)
+  - Bash(git commit *)
   - Read
+  - Edit
+  - Write
   - Glob
   - Grep
   - AskUserQuestion
