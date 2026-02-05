@@ -47,6 +47,88 @@ Without an adapter, Claude implements directly using the issue as the spec. Stil
 ```
 Creates a PR linked to the issue, with proper formatting and labels. When merged, issue auto-closes. Done.
 
+## Adapters: Extend Your Workflow
+
+Sheep It focuses on Git workflow orchestration. For implementation, it can delegate to specialized adapters.
+
+### Why Adapters?
+
+**Sheep It excels at:**
+- Branch management and Git operations
+- PR creation with proper formatting
+- Issue tracking and progress updates
+- Release management
+- Commit conventions
+
+**Adapters excel at:**
+- Structured spec creation (PRDs, technical designs)
+- Domain-specific implementation patterns
+- Code generation from specs
+- Advanced validation and checks
+
+Together, they create a complete workflow: **Sheep It handles Git, adapters handle code.**
+
+### Supported Adapters
+
+| Adapter | Description | Integration |
+|---------|-------------|-------------|
+| **[OpenSpec](https://github.com/Xavier-IV/openspec)** | Structured spec creation with PRDs | `proposal` → `apply` → `archive` |
+
+### How It Works
+
+When an adapter is configured:
+
+```
+/sheep:task "Add login"     →  Sheep It: Creates branch
+                               Adapter: Generates detailed spec
+                               Sheep It: Creates GitHub issue
+
+/sheep:start 22             →  Sheep It: Checkout branch, assign issue
+                               Adapter: Implements from spec
+                               Sheep It: Commits with conventions
+
+/sheep:it 22                →  Sheep It: Creates PR
+                               Adapter: Finalizes documentation
+                               Sheep It: Links issue, adds labels
+```
+
+**Division of responsibilities:**
+- **Sheep It**: All Git operations (branch, commit, PR, release)
+- **Adapter**: Spec creation and implementation strategy
+- **GitHub**: Single source of truth (issues, PRs, milestones)
+
+### Configuration
+
+Add to `.sheeprc.yml`:
+
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    task: "openspec:proposal"    # Spec creation
+    start: "openspec:apply"      # Implementation
+    ship: "openspec:archive"     # Finalization
+```
+
+Adapters are auto-detected from available Claude Code skills. To disable:
+
+```yaml
+adapter:
+  enabled: false
+```
+
+### Without an Adapter (Basic Mode)
+
+Don't have an adapter? No problem. Sheep It still provides:
+- Branch creation and management
+- Issue-driven workflow
+- Incremental commits with proper messages
+- PR creation and linking
+- Progress tracking
+
+The adapter system is optional but recommended for complex projects.
+
 ## Why I Built This
 
 I'm a solo dev who wanted something simple. I kept losing context when Claude reset, and managing `.planning/` folders felt like overhead for my small projects.
