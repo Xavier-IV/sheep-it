@@ -279,6 +279,10 @@ Tests:
 ⚠️  Missing: Controller specs
 
 CI: ✅ All checks passing
+    (or)
+CI: ❌ 2 checks failing
+   • build - TypeScript error in src/utils/date.ts:45
+   • test - 2 tests failed in Button.test.tsx
 
 Unresolved Feedback:
 ⚠️  2 items need attention
@@ -328,6 +332,25 @@ Options:
 - "Request changes" - description: "Needs fixes before merge"
 - "Comment only" - description: "Leave feedback without blocking"
 ```
+
+If CI is FAILING:
+```
+[AskUserQuestion]
+Question: "CI is failing. What do you want to do?"
+Header: "CI Failed"
+Options:
+- "Fix CI errors (Recommended)" - description: "I'll analyze and fix the errors"
+- "Continue review anyway" - description: "Ignore CI for now"
+- "Stop review" - description: "Can't review until CI passes"
+```
+
+If user chooses "Fix CI errors":
+1. Checkout the PR branch locally
+2. Analyze the error logs from `gh run view --log-failed`
+3. Read and fix the affected files
+4. Commit: `fix(#issue): resolve CI errors`
+5. Push to PR branch
+6. Continue with review (or wait for CI to re-run)
 </step>
 
 <step name="submit-review">
