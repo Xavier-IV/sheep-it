@@ -1,8 +1,8 @@
 # 🐑 Sheep It
 
-**Your GitHub Issues become PRDs. Claude implements them.**
+**Git workflow orchestrator for solo devs. Plan with Issues, ship with PRs.**
 
-A simple workflow for solo devs. Sheep It uses GitHub Issues as your spec, then Claude actually writes the code. One command to brainstorm, one to implement, one to ship.
+Sheep It manages your entire Git workflow: branches, commits, PRs, and releases. Use GitHub Issues as specs, let adapters handle implementation, while Sheep It orchestrates everything from `/sheep:task` to `/sheep:it`.
 
 ## 30-Second Install
 
