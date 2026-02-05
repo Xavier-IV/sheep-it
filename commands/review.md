@@ -5,6 +5,7 @@ allowed-tools:
   - Bash(gh pr view *)
   - Bash(gh pr diff *)
   - Bash(gh pr checks *)
+  - Bash(gh pr checkout *)
   - Bash(gh pr review *)
   - Bash(gh issue view *)
   - Bash(gh api repos/*/pulls/*/comments*)
@@ -220,14 +221,18 @@ Options:
 
 **If user chooses to fix:**
 
-1. Read the affected files
-2. Apply fixes based on error analysis
-3. Commit with message: `fix(#issue): resolve CI errors - [description]`
-4. Push to PR branch
-5. Wait for CI to re-run (or continue review)
+1. **Checkout the PR branch** (don't create a new branch!)
+2. Read the affected files
+3. Apply fixes based on error analysis
+4. Commit with message: `fix(#issue): resolve CI errors - [description]`
+5. Push to PR branch
+6. Wait for CI to re-run (or continue review)
 
 ```bash
-# After fixing, push to the PR branch
+# IMPORTANT: Checkout the existing PR branch (don't create a new branch!)
+gh pr checkout 45
+
+# After fixing, push to the PR branch (this updates the PR)
 git push origin HEAD
 ```
 </step>
@@ -364,12 +369,20 @@ Options:
 ```
 
 If user chooses "Fix CI errors":
-1. Checkout the PR branch locally
+1. **Checkout the PR branch locally** (don't create a new branch!)
 2. Analyze the error logs from `gh run view --log-failed`
 3. Read and fix the affected files
 4. Commit: `fix(#issue): resolve CI errors`
-5. Push to PR branch
+5. Push to PR branch (this updates the PR)
 6. Continue with review (or wait for CI to re-run)
+
+```bash
+# IMPORTANT: Checkout the existing PR branch (don't create a new branch!)
+gh pr checkout 45
+
+# After making fixes and committing...
+git push origin HEAD
+```
 </step>
 
 <step name="submit-review">
