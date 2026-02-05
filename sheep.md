@@ -83,3 +83,63 @@ Fire-and-forget autonomous execution for well-defined tasks.
 **Needs supervision:** Vague requirements, critical systems, large refactors
 
 Use `--force` to override: `/sheep:start 22 --yolo --force`
+
+## Adapter System
+
+Sheep It can integrate with external workflow tools (adapters) that provide specialized
+functionality for spec creation, implementation, or archiving.
+
+### How Adapters Work
+
+Adapters delegate specific workflow steps to external tools while Sheep It handles GitHub operations:
+
+| Sheep Command | Adapter Mapping | What Happens |
+|---------------|-----------------|--------------|
+| `/sheep:task` | `task` → `openspec:proposal` | Adapter creates spec, Sheep creates GitHub issue |
+| `/sheep:start` | `start` → `openspec:apply` | Sheep handles branch/assignment, adapter implements |
+| `/sheep:it` | `ship` → `openspec:archive` | Sheep creates PR, adapter archives/cleans up |
+
+### Supported Adapters
+
+| Adapter | Description | Commands |
+|---------|-------------|----------|
+| **OpenSpec** | Structured spec creation and implementation | `proposal`, `apply`, `archive` |
+
+### Configuration
+
+Adapters can be auto-detected or explicitly configured in `.sheeprc.yml`:
+
+```yaml
+adapter:
+  enabled: true                   # Enable/disable adapter
+  name: "openspec"                # Adapter name (auto-detected if not set)
+  mappings:
+    task: "openspec:proposal"     # Spec creation
+    start: "openspec:apply"       # Implementation
+    ship: "openspec:archive"      # Archive on ship
+```
+
+### Auto-Detection
+
+If no config is present, Sheep It auto-detects available adapters by checking for
+skill patterns (e.g., `/openspec:proposal`). When detected:
+
+```
+🔌 Adapter detected: OpenSpec
+
+Using OpenSpec for:
+  • Spec creation (sheep:task → openspec:proposal)
+  • Implementation (sheep:start → openspec:apply)
+  • Archive (sheep:it → openspec:archive)
+```
+
+### Disabling Adapters
+
+To use Sheep It's default workflow even when an adapter is detected:
+
+```yaml
+adapter:
+  enabled: false
+```
+
+Or run `/sheep:config` and select "Disabled" for adapter integration
