@@ -12,6 +12,8 @@ allowed-tools:
   - Bash(gh api repos/*/issues/*/comments*)
   - Bash(gh run list *)
   - Bash(gh run view *)
+  - Bash(git checkout *)
+  - Bash(git fetch *)
   - Bash(git push origin *)
   - Bash(git add *)
   - Bash(git commit *)
