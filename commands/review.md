@@ -140,6 +140,83 @@ Actionable Feedback Analysis:
    - All checks passing?
 </step>
 
+<step name="analyze-ci-errors">
+**If CI checks are failing, fetch detailed error logs:**
+
+```bash
+# Get failed workflow runs for this PR
+gh pr checks 45 --json name,state,conclusion --jq '.[] | select(.conclusion == "failure")'
+
+# List recent workflow runs for the PR branch
+gh run list --branch feature/22-description --limit 5 --json databaseId,name,status,conclusion
+
+# Get detailed logs for a failed run (replace RUN_ID with actual ID)
+gh run view RUN_ID --log-failed
+```
+
+**Parse and summarize errors:**
+
+Look for common patterns:
+- **Build errors:** TypeScript/compilation failures, missing dependencies
+- **Test failures:** Failed assertions, snapshot mismatches
+- **Lint errors:** ESLint, Rubocop, formatting issues
+- **Type errors:** TypeScript strict mode violations
+
+**Display CI Error Summary:**
+
+```
+CI Errors Detected:
+
+1. build (run #12345) - failed 5 min ago
+   ❌ TypeScript compilation error
+   src/utils/date.ts:45:12
+   Property 'format' does not exist on type 'Date'
+
+   💡 Likely fix: Import date-fns or use toLocaleDateString()
+
+2. test (run #12346) - failed 5 min ago
+   ❌ 2 tests failed
+
+   FAIL src/components/Button.test.tsx
+   Line 23: Expected "Submit" but received "Submti"
+
+   💡 Likely fix: Typo in Button component text
+
+3. lint (run #12347) - failed 5 min ago
+   ❌ ESLint errors
+
+   src/hooks/useData.ts:12:5
+   'data' is assigned but never used (no-unused-vars)
+
+   💡 Likely fix: Remove unused variable or use it
+```
+
+**If errors are fixable, offer to resolve:**
+
+```
+[AskUserQuestion]
+Question: "CI is failing. Want me to analyze and fix these errors?"
+Header: "CI Errors"
+Options:
+- "Yes, fix them (Recommended)" - description: "I'll fix and push to the PR"
+- "Show details only" - description: "Just show me the full logs"
+- "Skip CI analysis" - description: "Continue with review"
+```
+
+**If user chooses to fix:**
+
+1. Read the affected files
+2. Apply fixes based on error analysis
+3. Commit with message: `fix(#issue): resolve CI errors - [description]`
+4. Push to PR branch
+5. Wait for CI to re-run (or continue review)
+
+```bash
+# After fixing, push to the PR branch
+git push origin HEAD
+```
+</step>
+
 <step name="examine-changes">
 **Examine key changes:**
 
