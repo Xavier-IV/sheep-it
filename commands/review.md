@@ -219,6 +219,9 @@ Consider addressing these before approving, or verify they've been
 resolved in the latest commits.
 ```
 
+**Decision options depend on feedback status:**
+
+If NO unresolved feedback:
 ```
 [AskUserQuestion]
 Question: "What's your review decision?"
@@ -228,6 +231,18 @@ Options:
 - "Request changes" - description: "Needs fixes before merge"
 - "Comment only" - description: "Leave feedback without blocking"
 - "Need more time" - description: "I'll review more thoroughly"
+```
+
+If HAS unresolved feedback:
+```
+[AskUserQuestion]
+Question: "There's unresolved feedback. What's your review decision?"
+Header: "Decision"
+Options:
+- "Review feedback first (Recommended)" - description: "Check if issues were addressed"
+- "Approve anyway" - description: "Feedback has been addressed in commits"
+- "Request changes" - description: "Needs fixes before merge"
+- "Comment only" - description: "Leave feedback without blocking"
 ```
 </step>
 
