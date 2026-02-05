@@ -8,9 +8,11 @@
 set -e
 
 SHEEP_DIR="$HOME/.claude/commands/sheep"
+REPO_ZIP_URL="https://github.com/Xavier-IV/sheep-it/archive/refs/heads/master.zip"
 REPO_RAW_URL="https://raw.githubusercontent.com/Xavier-IV/sheep-it/master"
+ZIP_EXTRACT_DIR="sheep-it-master"
 
-# Command files to install
+# Command files to install (used for fallback and verification)
 COMMAND_FILES=(
     "board.md"
     "config.md"
@@ -31,6 +33,19 @@ COMMAND_FILES=(
     "tasks.md"
     "verify.md"
 )
+
+# Temporary directory for zip extraction
+TEMP_DIR=""
+
+# Cleanup function - removes temp directory on exit
+cleanup() {
+    if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
+        rm -rf "$TEMP_DIR"
+    fi
+}
+
+# Set trap to ensure cleanup runs on exit (success or failure)
+trap cleanup EXIT
 
 # Detect operating system
 detect_os() {
@@ -88,6 +103,16 @@ if ! command -v curl &> /dev/null; then
 fi
 echo "✓ curl available"
 
+# Check if unzip is available (for fast installation)
+USE_ZIP=false
+if command -v unzip &> /dev/null; then
+    USE_ZIP=true
+    echo "✓ unzip available (fast mode)"
+else
+    echo "⚠️  unzip not found - using slower individual downloads"
+    echo "   Install unzip for faster installation next time"
+fi
+
 # Check if gh CLI is installed (warning only, not required for install)
 if ! command -v gh &> /dev/null; then
     echo "⚠️  GitHub CLI (gh) not found - you'll need it to use Sheep It"
@@ -107,20 +132,61 @@ echo "✓ Created $SHEEP_DIR"
 
 # Download command files
 echo ""
-echo "Downloading command files..."
 
 success_count=0
 fail_count=0
 
-for file in "${COMMAND_FILES[@]}"; do
-    if curl -fsSL "${REPO_RAW_URL}/commands/${file}" -o "${SHEEP_DIR}/${file}" 2>/dev/null; then
-        echo "  ✓ $file"
-        success_count=$((success_count + 1))
+if [ "$USE_ZIP" = true ]; then
+    # Fast mode: Download zip archive and extract
+    echo "Downloading commands (zip archive)..."
+
+    # Create temporary directory
+    TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'sheep-it')
+
+    ZIP_FILE="${TEMP_DIR}/sheep-it.zip"
+
+    # Download the zip archive
+    if curl -fsSL "$REPO_ZIP_URL" -o "$ZIP_FILE" 2>/dev/null; then
+        echo "  ✓ Downloaded archive"
+
+        # Extract only the commands directory
+        if unzip -q "$ZIP_FILE" "${ZIP_EXTRACT_DIR}/commands/*.md" -d "$TEMP_DIR" 2>/dev/null; then
+            echo "  ✓ Extracted commands"
+
+            # Copy command files to installation directory
+            for file in "${TEMP_DIR}/${ZIP_EXTRACT_DIR}/commands/"*.md; do
+                if [ -f "$file" ]; then
+                    filename=$(basename "$file")
+                    cp "$file" "${SHEEP_DIR}/${filename}"
+                    success_count=$((success_count + 1))
+                fi
+            done
+
+            echo "  ✓ Installed $success_count command files"
+        else
+            echo "  ✗ Failed to extract archive, falling back to individual downloads..."
+            USE_ZIP=false
+        fi
     else
-        echo "  ✗ $file (failed)"
-        fail_count=$((fail_count + 1))
+        echo "  ✗ Failed to download archive, falling back to individual downloads..."
+        USE_ZIP=false
     fi
-done
+fi
+
+# Fallback: Download files individually (if zip failed or unzip unavailable)
+if [ "$USE_ZIP" = false ]; then
+    echo "Downloading command files individually..."
+
+    for file in "${COMMAND_FILES[@]}"; do
+        if curl -fsSL "${REPO_RAW_URL}/commands/${file}" -o "${SHEEP_DIR}/${file}" 2>/dev/null; then
+            echo "  ✓ $file"
+            success_count=$((success_count + 1))
+        else
+            echo "  ✗ $file (failed)"
+            fail_count=$((fail_count + 1))
+        fi
+    done
+fi
 
 echo ""
 
