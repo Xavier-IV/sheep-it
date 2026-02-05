@@ -1,8 +1,8 @@
 # 🐑 Sheep It
 
-**Your GitHub Issues become PRDs. Claude implements them.**
+**Git workflow orchestrator for solo devs. Plan with Issues, ship with PRs.**
 
-A simple workflow for solo devs. Sheep It uses GitHub Issues as your spec, then Claude actually writes the code. One command to brainstorm, one to implement, one to ship.
+Sheep It manages your entire Git workflow: branches, commits, PRs, and releases. Use GitHub Issues as specs, let adapters handle implementation, while Sheep It orchestrates everything from `/sheep:task` to `/sheep:it`.
 
 ## 30-Second Install
 
@@ -27,17 +27,107 @@ Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.gith
 ```
 Claude asks clarifying questions, refines scope, and creates a GitHub Issue with acceptance criteria. **The issue IS your PRD.**
 
-### Step 2: Claude implements it
+### Step 2: Implement (Hybrid Approach)
+
+**Option A: Adapter-Powered (Recommended)**
 ```
 /sheep:start 22
 ```
-Claude reads the issue as the spec, writes the code, commits incrementally, and auto-checks acceptance criteria as it completes them.
+Sheep It creates the branch and assigns the issue. If you have an adapter configured (like OpenSpec), it delegates implementation to the adapter. Sheep It handles all Git operations: commits, branch management, and tracking.
+
+**Option B: Basic Mode**
+```
+/sheep:start 22
+```
+Without an adapter, Claude implements directly using the issue as the spec. Still gets branch creation, incremental commits, and acceptance criteria tracking.
 
 ### Step 3: Ship it
 ```
 /sheep:it 22
 ```
-Creates a PR linked to the issue. When merged, issue auto-closes. Done.
+Creates a PR linked to the issue, with proper formatting and labels. When merged, issue auto-closes. Done.
+
+## Adapters: Extend Your Workflow
+
+Sheep It focuses on Git workflow orchestration. For implementation, it can delegate to specialized adapters.
+
+### Why Adapters?
+
+**Sheep It excels at:**
+- Branch management and Git operations
+- PR creation with proper formatting
+- Issue tracking and progress updates
+- Release management
+- Commit conventions
+
+**Adapters excel at:**
+- Structured spec creation (PRDs, technical designs)
+- Domain-specific implementation patterns
+- Code generation from specs
+- Advanced validation and checks
+
+Together, they create a complete workflow: **Sheep It handles Git, adapters handle code.**
+
+### Supported Adapters
+
+| Adapter | Description | Integration |
+|---------|-------------|-------------|
+| **[OpenSpec](https://github.com/Xavier-IV/openspec)** | Structured spec creation with PRDs | `proposal` → `apply` → `archive` |
+
+### How It Works
+
+When an adapter is configured:
+
+```
+/sheep:task "Add login"     →  Sheep It: Creates branch
+                               Adapter: Generates detailed spec
+                               Sheep It: Creates GitHub issue
+
+/sheep:start 22             →  Sheep It: Checkout branch, assign issue
+                               Adapter: Implements from spec
+                               Sheep It: Commits with conventions
+
+/sheep:it 22                →  Sheep It: Creates PR
+                               Adapter: Finalizes documentation
+                               Sheep It: Links issue, adds labels
+```
+
+**Division of responsibilities:**
+- **Sheep It**: All Git operations (branch, commit, PR, release)
+- **Adapter**: Spec creation and implementation strategy
+- **GitHub**: Single source of truth (issues, PRs, milestones)
+
+### Configuration
+
+Add to `.sheeprc.yml`:
+
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    task: "openspec:proposal"    # Spec creation
+    start: "openspec:apply"      # Implementation
+    ship: "openspec:archive"     # Finalization
+```
+
+Adapters are auto-detected from available Claude Code skills. To disable:
+
+```yaml
+adapter:
+  enabled: false
+```
+
+### Without an Adapter (Basic Mode)
+
+Don't have an adapter? No problem. Sheep It still provides:
+- Branch creation and management
+- Issue-driven workflow
+- Incremental commits with proper messages
+- PR creation and linking
+- Progress tracking
+
+The adapter system is optional but recommended for complex projects.
 
 ## Why I Built This
 
@@ -67,7 +157,7 @@ This is just a personal tool I built for myself. If it helps you too, great!
 | `/sheep:task "title"` | Brainstorm → refine → create issue |
 | `/sheep:milestone "v1.0"` | Create milestone with due date |
 | **Working** | |
-| `/sheep:start [issue]` | Pick issue → implement → commit |
+| `/sheep:start [issue]` | Start work: branch + assign + implement (delegates to adapter if configured) |
 | `/sheep:resume` | Continue after context reset |
 | `/sheep:status` | Quick "where am I?" check |
 | `/sheep:verify [issue]` | Verify against acceptance criteria |
@@ -112,53 +202,137 @@ adapter:
     ship: "openspec:archive"
 ```
 
-## Adapters
+## Git Workflow Examples
 
-Sheep It can integrate with external workflow tools (adapters) for enhanced spec creation and implementation.
+Sheep It automates common Git workflows. Here are real-world examples:
 
-### Supported Adapters
+### Branch Management
 
-| Adapter | Description | Integration |
-|---------|-------------|-------------|
-| **[OpenSpec](https://github.com/Xavier-IV/openspec)** | Structured spec creation with PRDs | `proposal` → `apply` → `archive` |
-
-### How It Works
-
-When an adapter is configured:
-
-```
-/sheep:task "Add login"     →  Calls /openspec:proposal
-                               Creates GitHub issue from spec
-
-/sheep:start 22             →  Creates branch, assigns issue
-                               Calls /openspec:apply for implementation
-
-/sheep:it                   →  Creates PR
-                               Calls /openspec:archive to finalize
+**Automatic branch creation with conventions:**
+```bash
+/sheep:start 22
+# Creates: feature/22-descriptive-slug
+# Checks out from latest main/master
+# Handles branch conflicts automatically
 ```
 
-Sheep It handles all GitHub operations (issues, PRs, tracking) while the adapter handles spec creation and implementation details.
+**Sync with main during long-running work:**
+```bash
+/sheep:sync
+# Fetches origin, rebases/merges with main
+# Handles conflicts interactively
+# Keeps your feature branch up-to-date
+```
 
-### Auto-Detection
+### Commit Workflows
 
-Adapters are auto-detected from available Claude Code skills. To disable:
+**Atomic commits with issue traceability:**
+```bash
+# Sheep It creates atomic commits automatically:
+feat(#22): add working hours model
+feat(#22): add configuration UI
+test(#22): add model specs
+docs(#22): update API documentation
 
+# Every commit references the issue
+# Git history is fully traceable
+```
+
+**Conventional commits by default:**
 ```yaml
-adapter:
-  enabled: false
+# Configure in .sheeprc.yml
+commits:
+  style: "conventional"  # feat:, fix:, chore:, docs:, test:
+```
+
+### PR Creation
+
+**Formatted PRs with proper linking:**
+```bash
+/sheep:it 22
+# Creates PR with:
+# - Title: "feat: [Issue title] (#22)"
+# - Body: "Closes #22" + summary
+# - Labels: from issue
+# - Auto-linked to issue (closes on merge)
+```
+
+**PR template integration:**
+```markdown
+# .github/pull_request_template.md
+Sheep It respects your PR templates and fills in:
+- Issue reference
+- Summary from commits
+- Checklist from acceptance criteria
+```
+
+### Release Workflows
+
+**Automated releases from milestones:**
+```bash
+/sheep:release v1.0.0
+# Creates GitHub release with:
+# - Tag: v1.0.0
+# - Release notes from milestone issues
+# - Commit log since last release
+# - Auto-generated changelog
+```
+
+### Progress Tracking
+
+**Live progress in issues:**
+```bash
+# As Sheep It works, it updates the issue:
+# - Checks off acceptance criteria ✅
+# - Posts progress comments
+# - Updates labels (in progress → ready for review)
+# - Links commits and branches
+```
+
+**Resume after context loss:**
+```bash
+/sheep:resume
+# Reads git status + GitHub state
+# Shows: current branch, issue, progress
+# Continues exactly where you left off
+```
+
+### Workflow Hooks
+
+**Integrate with your CI/CD:**
+```yaml
+# .sheeprc.yml
+hooks:
+  pre_commit:
+    - "npm run lint"
+    - "npm run test"
+
+  pre_pr:
+    - "npm run build"
+    - "npm run test:e2e"
+
+  post_release:
+    - "./deploy.sh"
 ```
 
 ## Philosophy
 
-GitHub already has all the infrastructure for project management. Sheep It just connects the dots:
+**Git-first workflow orchestration.** GitHub already has all the infrastructure: issues, PRs, milestones, projects. Sheep It orchestrates the Git workflow around these primitives:
 
 - **Issues** → Your PRD / spec
-- **Milestones** → Version planning
+- **Branches** → Feature isolation (auto-created, convention-based)
+- **Commits** → Incremental progress (atomic, traceable to issues)
+- **PRs** → Code review and shipping (formatted, linked, labeled)
+- **Releases** → Version milestones (automated from tags)
 - **Projects** → Kanban board
-- **Checkboxes** → Acceptance criteria (auto-updated!)
-- **Git state** → Progress tracking
+- **Git state** → Single source of truth for progress
 
-Keep it simple. Use what's already there.
+**Separation of concerns:**
+- **Sheep It** → Git workflow orchestration
+- **Adapters** → Implementation strategy (optional)
+- **GitHub** → Single source of truth
+
+Keep it simple. Use what's already there. Focus on the workflow, not the tooling.
 
 ---
 
