@@ -95,15 +95,17 @@ Adapters delegate specific workflow steps to external tools while Sheep It handl
 
 | Sheep Command | Adapter Mapping | What Happens |
 |---------------|-----------------|--------------|
-| `/sheep:task` | `task` → `openspec:proposal` | Adapter creates spec, Sheep creates GitHub issue |
-| `/sheep:start` | `start` → `openspec:apply` | Sheep handles branch/assignment, adapter implements |
-| `/sheep:it` | `ship` → `openspec:archive` | Sheep creates PR, adapter archives/cleans up |
+| `/sheep:task` (default) | `quick_mode` → `opsx:ff` | Fast spec generation → GitHub issue |
+| `/sheep:task --deep` | `research_mode` → `opsx:explore` | Deep research → GitHub issue |
+| `/sheep:start` | `apply` → `opsx:apply` | Sheep handles branch/assignment, adapter implements |
+| `/sheep:verify` | `verify` → `opsx:verify` | Adapter validates implementation (optional, manual) |
+| `/sheep:it` | `verify` + `archive` → `opsx:verify` + `opsx:archive` | Verify, then create PR and archive |
 
 ### Supported Adapters
 
 | Adapter | Description | Commands |
 |---------|-------------|----------|
-| **OpenSpec** | Structured spec creation and implementation | `proposal`, `apply`, `archive` |
+| **OpenSpec** | Structured spec creation and implementation | Quick: `ff` / Research: `explore`, then `apply`, then `archive` |
 
 ### Configuration
 
@@ -113,24 +115,27 @@ Adapters can be auto-detected or explicitly configured in `.sheeprc.yml`:
 adapter:
   enabled: true                   # Enable/disable adapter
   name: "openspec"                # Adapter name (auto-detected if not set)
-  mappings:
-    task: "openspec:proposal"     # Spec creation
-    start: "openspec:apply"       # Implementation
-    ship: "openspec:archive"      # Archive on ship
+  quick_mode: "opsx:ff"           # Fast spec for --quick
+  research_mode: "opsx:explore"   # Deep research for --deep
+  apply: "opsx:apply"             # Implementation
+  verify: "opsx:verify"           # Verification (manual or auto in /sheep:it)
+  archive: "opsx:archive"         # Finalization
 ```
 
 ### Auto-Detection
 
 If no config is present, Sheep It auto-detects available adapters by checking for
-skill patterns (e.g., `/openspec:proposal`). When detected:
+skill patterns (e.g., `/opsx:ff`). When detected:
 
 ```
 🔌 Adapter detected: OpenSpec
 
 Using OpenSpec for:
-  • Spec creation (sheep:task → openspec:proposal)
-  • Implementation (sheep:start → openspec:apply)
-  • Archive (sheep:it → openspec:archive)
+  • Task creation (/sheep:task → opsx:ff by default)
+  • Deep research (/sheep:task --deep → opsx:explore)
+  • Implementation (/sheep:start → opsx:apply)
+  • Verification (/sheep:verify → opsx:verify)
+  • Finalization (/sheep:it → opsx:verify + opsx:archive)
 ```
 
 ### Disabling Adapters

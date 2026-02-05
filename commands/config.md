@@ -131,28 +131,46 @@ Options:
 If "Custom" selected:
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for task creation (e.g., openspec:proposal):"
-Header: "Task adapter"
+Question: "Enter adapter skill for default task creation (/sheep:task):"
+Header: "Task mode"
 Options:
-- "openspec:proposal (Recommended)" - description: "OpenSpec proposal command"
-- "None" - description: "Use default sheep:task flow"
+- "opsx:ff (Recommended)" - description: "OpenSpec fast-forward (new + all artifacts)"
+- "None" - description: "Use Sheep It interactive brainstorming"
 ```
 
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for implementation (e.g., openspec:apply):"
-Header: "Start adapter"
+Question: "Enter adapter skill for deep research (/sheep:task --deep):"
+Header: "Research mode"
 Options:
-- "openspec:apply (Recommended)" - description: "OpenSpec apply command"
+- "opsx:explore (Recommended)" - description: "OpenSpec exploration (explore + new + continue)"
+- "None" - description: "Use Sheep It research without adapter"
+```
+
+```
+[AskUserQuestion]
+Question: "Enter adapter skill for implementation (/sheep:start):"
+Header: "Implementation"
+Options:
+- "opsx:apply (Recommended)" - description: "OpenSpec apply command"
 - "None" - description: "Use default sheep:start flow"
 ```
 
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for shipping (e.g., openspec:archive):"
-Header: "Ship adapter"
+Question: "Enter adapter skill for verification (/sheep:verify):"
+Header: "Verification"
 Options:
-- "openspec:archive (Recommended)" - description: "OpenSpec archive command"
+- "opsx:verify (Recommended)" - description: "OpenSpec verify command (auto-runs in /sheep:it)"
+- "None" - description: "Skip verification step"
+```
+
+```
+[AskUserQuestion]
+Question: "Enter adapter skill for finalization (/sheep:it):"
+Header: "Finalization"
+Options:
+- "opsx:archive (Recommended)" - description: "OpenSpec archive command"
 - "None" - description: "Use default sheep:it flow"
 ```
 </step>
@@ -189,10 +207,11 @@ auto_update:
 adapter:
   enabled: true                   # Set to false to disable adapter
   name: "openspec"                # Adapter name (auto-detected if not set)
-  mappings:
-    task: "openspec:proposal"     # Skill for spec creation (/sheep:task)
-    start: "openspec:apply"       # Skill for implementation (/sheep:start)
-    ship: "openspec:archive"      # Skill for archiving (/sheep:it)
+  quick_mode: "opsx:ff"           # Fast spec for /sheep:task --quick
+  research_mode: "opsx:explore"   # Deep research for /sheep:task --deep
+  apply: "opsx:apply"             # Implementation for /sheep:start
+  verify: "opsx:verify"           # Verification for /sheep:verify (auto in /sheep:it)
+  archive: "opsx:archive"         # Finalization for /sheep:it
 ```
 
 ```
@@ -203,7 +222,7 @@ Settings:
   Commits: Conventional (feat:, fix:, etc.)
   Labels: enhancement, bug, chore
   Auto-update: ✅ checkboxes, ✅ comments
-  Adapter: openspec (task → proposal, start → apply, ship → archive)
+  Adapter: openspec (task → ff, --deep → explore, start → apply, verify → verify, ship → archive)
 
 💡 Tip: Commit this file to share settings with your team.
 ```
@@ -239,10 +258,11 @@ project:
 adapter:
   enabled: boolean        # Enable/disable adapter integration
   name: string            # Adapter name (e.g., "openspec") - auto-detected if not set
-  mappings:
-    task: string          # Skill for spec creation (e.g., "openspec:proposal")
-    start: string         # Skill for implementation (e.g., "openspec:apply")
-    ship: string          # Skill for archiving (e.g., "openspec:archive")
+  quick_mode: string      # Skill for fast spec (e.g., "opsx:ff")
+  research_mode: string   # Skill for deep research (e.g., "opsx:explore")
+  apply: string           # Skill for implementation (e.g., "opsx:apply")
+  verify: string          # Skill for verification (e.g., "opsx:verify")
+  archive: string         # Skill for finalization (e.g., "opsx:archive")
 ```
 </config-schema>
 

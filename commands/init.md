@@ -153,7 +153,7 @@ Check if any adapter skills are available (e.g., OpenSpec):
 
 ```
 # Check for common adapter patterns in available skills
-# e.g., /openspec:proposal, /openspec:apply, /openspec:archive
+# e.g., /opsx:ff, /opsx:apply, /opsx:archive
 ```
 
 If adapter detected:
@@ -183,10 +183,11 @@ If "Yes, enable adapter":
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "openspec:proposal"
-    start: "openspec:apply"
-    ship: "openspec:archive"
+  quick_mode: "opsx:ff"          # Default /sheep:task mode
+  research_mode: "opsx:explore"  # Deep research for --deep
+  apply: "opsx:apply"            # Implementation
+  verify: "opsx:verify"          # Verification
+  archive: "opsx:archive"        # Finalization
 ```
 
 If no adapter detected, skip this step silently.
@@ -231,9 +232,11 @@ Route to selected commands in order: milestone → task → config.
 **If adapter was configured, also show:**
 ```
 🔌 Adapter Integration:
-   /sheep:task  → /openspec:proposal
-   /sheep:start → /openspec:apply
-   /sheep:it    → /openspec:archive
+   /sheep:task        → /opsx:ff (default)
+   /sheep:task --deep → /opsx:explore
+   /sheep:start       → /opsx:apply
+   /sheep:verify      → /opsx:verify
+   /sheep:it          → /opsx:verify + /opsx:archive
 ```
 </step>
 

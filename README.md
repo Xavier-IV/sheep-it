@@ -21,11 +21,19 @@ Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.gith
 
 ## See It In Action
 
-### Step 1: Brainstorm a task
+### Step 1: Create a task (Two modes)
+
+**Default: Quick spec with OpenSpec**
 ```
 /sheep:task "Add user login"
 ```
-Claude asks clarifying questions, refines scope, and creates a GitHub Issue with acceptance criteria. **The issue IS your PRD.**
+Fast spec generation → OpenSpec creates complete spec (proposal, specs, design) → GitHub Issue. Best for most features.
+
+**Deep: Research mode**
+```
+/sheep:task "Add payments" --deep
+```
+Parallel research agents → OpenSpec exploration → Detailed spec → GitHub Issue. Best for complex features needing investigation.
 
 ### Step 2: Implement (Hybrid Approach)
 
@@ -72,7 +80,7 @@ Together, they create a complete workflow: **Sheep It handles Git, adapters hand
 
 | Adapter | Description | Integration |
 |---------|-------------|-------------|
-| **[OpenSpec](https://github.com/Xavier-IV/openspec)** | Structured spec creation with PRDs | `proposal` → `apply` → `archive` |
+| **[OpenSpec](https://github.com/Fission-AI/OpenSpec)** | Structured spec creation with PRDs | Quick: `ff` / Research: `explore` → `apply` → `archive` |
 
 ### How It Works
 
@@ -105,10 +113,11 @@ Add to `.sheeprc.yml`:
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "openspec:proposal"    # Spec creation
-    start: "openspec:apply"      # Implementation
-    ship: "openspec:archive"     # Finalization
+  quick_mode: "opsx:ff"          # Fast spec (/sheep:task default)
+  research_mode: "opsx:explore"  # Deep research (/sheep:task --deep)
+  apply: "opsx:apply"            # Implementation (/sheep:start)
+  verify: "opsx:verify"          # Verification (/sheep:verify, auto in /sheep:it)
+  archive: "opsx:archive"        # Finalization (/sheep:it)
 ```
 
 Adapters are auto-detected from available Claude Code skills. To disable:
@@ -196,10 +205,11 @@ auto_update:
 adapter:
   enabled: true
   name: "openspec"
-  mappings:
-    task: "openspec:proposal"
-    start: "openspec:apply"
-    ship: "openspec:archive"
+  quick_mode: "opsx:ff"          # Fast spec
+  research_mode: "opsx:explore"  # Deep research
+  apply: "opsx:apply"            # Implementation
+  verify: "opsx:verify"          # Verification
+  archive: "opsx:archive"        # Finalization
 ```
 
 ## Git Workflow Examples
