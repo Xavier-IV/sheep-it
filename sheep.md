@@ -46,6 +46,7 @@ Sheep It leverages GitHub's native features (Issues, Milestones, Projects, Relea
 3. **Keep it simple** - Minimal config, maximum leverage of GitHub features
 4. **Audit trail for free** - Git history + GitHub activity = full traceability
 5. **Safe defaults** - Private repos, explicit public
+6. **Atomic commits** - One change per commit, if you need "and" to describe it, split it
 
 ## GitHub Feature Mapping
 
