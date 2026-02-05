@@ -89,6 +89,9 @@ Parse:
 # Get repository info
 REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
 
+# PR conversation comments (general discussion on the PR)
+gh pr view 45 --json comments --jq '.comments[] | {user: .author.login, body: .body, created_at: .createdAt, url: .url}'
+
 # PR review comments (inline code comments)
 gh api "repos/${REPO}/pulls/45/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at, path: .path, line: .line, in_reply_to_id: .in_reply_to_id}'
 
@@ -106,22 +109,27 @@ Look for:
 - **Change requests:** Comments with phrases like "please", "should", "must", "need to", "consider"
 - **Unresolved threads:** PR comments without replies, or threads still marked unresolved
 - **Review states:** `CHANGES_REQUESTED` reviews that haven't been dismissed
+- **PR conversation:** General comments on the PR (not inline) that may contain feedback
 
 **Categorize feedback:**
 
 ```
 Actionable Feedback Analysis:
 
-1. CHANGES_REQUESTED reviews:
+1. PR Conversation Comments:
+   - General discussion, questions, or feedback in the conversation tab
+   - May include automated comments from bots/CI or human reviewers
+
+2. CHANGES_REQUESTED reviews:
    - User, date, and summary of requested changes
 
-2. Unanswered questions:
+3. Unanswered questions:
    - Questions from reviewers without responses
 
-3. Unaddressed suggestions:
+4. Unaddressed suggestions:
    - Specific change requests that may not be implemented
 
-4. Recent discussion:
+5. Recent discussion:
    - Any comments in the last 24-48 hours that may need attention
 ```
 </step>
@@ -287,13 +295,16 @@ CI: ❌ 2 checks failing
    • test - 2 tests failed in Button.test.tsx
 
 Unresolved Feedback:
-⚠️  2 items need attention
+⚠️  3 items need attention
 
 1. @reviewer1 (2 days ago) - CHANGES_REQUESTED
    "Please add input validation for the date field"
 
-2. @reviewer2 (1 day ago) - Question
+2. @reviewer2 (1 day ago) - Question in conversation
    "Why did you choose this approach over using callbacks?"
+
+3. @claude (3 hours ago) - Comment
+   "Code review: No issues found. Checked for bugs and CLAUDE.md compliance."
 ```
 
 **If there's unresolved feedback, highlight it:**
@@ -301,12 +312,18 @@ Unresolved Feedback:
 ```
 ⚠️  UNRESOLVED FEEDBACK DETECTED
 
-There are 2 unresolved items from previous reviews:
+There are 3 unresolved items from previous reviews:
 - 1 CHANGES_REQUESTED review by @reviewer1
 - 1 unanswered question from @reviewer2
+- 1 conversation comment from @claude
 
 Consider addressing these before approving, or verify they've been
 resolved in the latest commits.
+
+💡 Tip: Check all comment sources:
+   • PR conversation tab (general discussion)
+   • Review comments (inline code feedback)
+   • Formal reviews (approve/request changes)
 ```
 
 **Decision options depend on feedback status:**
