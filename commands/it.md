@@ -12,7 +12,9 @@ allowed-tools:
   - Bash(git log *)
   - Bash(git diff *)
   - Bash(git rev-list *)
+  - Bash(cat .sheeprc.yml *)
   - AskUserQuestion
+  - Skill
 ---
 
 <objective>
@@ -196,6 +198,46 @@ gh pr create --draft \
 ```
 </step>
 
+<step name="adapter-archive">
+**Call adapter archive (if configured):**
+
+After creating the PR, check if an adapter should handle archiving/cleanup.
+
+**1. Check for config file:**
+```bash
+cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
+```
+
+**2. If adapter has ship mapping:**
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    ship: "openspec:archive"
+```
+
+**3. If adapter found and enabled with ship mapping:**
+
+```
+🔌 Adapter: Running archive step
+   → /openspec:archive {issue/PR context}
+```
+
+**Delegate to adapter skill:**
+```
+[Skill tool]
+skill: "{adapter.mappings.ship}"  # e.g., "openspec:archive"
+args: "{issue number or PR context}"
+```
+
+The adapter handles any cleanup, archiving, or finalization needed.
+
+**4. If no adapter or no ship mapping:**
+
+Skip this step - no archive action needed.
+</step>
+
 <step name="confirm">
 **Show result:**
 
@@ -205,12 +247,20 @@ gh pr create --draft \
 ✓ Pushed branch: feature/22-studio-working-hours
 ✓ Created PR #45: feat: Studio Working Hours (#22)
 ✓ Linked to issue #22
+✓ Adapter archive complete (if applicable)
 
 PR: https://github.com/<owner>/<repo>/pull/45
 
 When merged, issue #22 will auto-close! 🎉
 
 💡 Tip: Run /clear to start fresh - your context is saved in GitHub!
+```
+
+**If adapter was used, show adapter status:**
+```
+🔌 Adapter actions:
+   ✓ OpenSpec archive completed
+   → Spec files archived/cleaned up
 ```
 </step>
 
