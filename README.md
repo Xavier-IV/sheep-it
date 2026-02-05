@@ -202,6 +202,119 @@ adapter:
     ship: "openspec:archive"
 ```
 
+## Git Workflow Examples
+
+Sheep It automates common Git workflows. Here are real-world examples:
+
+### Branch Management
+
+**Automatic branch creation with conventions:**
+```bash
+/sheep:start 22
+# Creates: feature/22-descriptive-slug
+# Checks out from latest main/master
+# Handles branch conflicts automatically
+```
+
+**Sync with main during long-running work:**
+```bash
+/sheep:sync
+# Fetches origin, rebases/merges with main
+# Handles conflicts interactively
+# Keeps your feature branch up-to-date
+```
+
+### Commit Workflows
+
+**Atomic commits with issue traceability:**
+```bash
+# Sheep It creates atomic commits automatically:
+feat(#22): add working hours model
+feat(#22): add configuration UI
+test(#22): add model specs
+docs(#22): update API documentation
+
+# Every commit references the issue
+# Git history is fully traceable
+```
+
+**Conventional commits by default:**
+```yaml
+# Configure in .sheeprc.yml
+commits:
+  style: "conventional"  # feat:, fix:, chore:, docs:, test:
+```
+
+### PR Creation
+
+**Formatted PRs with proper linking:**
+```bash
+/sheep:it 22
+# Creates PR with:
+# - Title: "feat: [Issue title] (#22)"
+# - Body: "Closes #22" + summary
+# - Labels: from issue
+# - Auto-linked to issue (closes on merge)
+```
+
+**PR template integration:**
+```markdown
+# .github/pull_request_template.md
+Sheep It respects your PR templates and fills in:
+- Issue reference
+- Summary from commits
+- Checklist from acceptance criteria
+```
+
+### Release Workflows
+
+**Automated releases from milestones:**
+```bash
+/sheep:release v1.0.0
+# Creates GitHub release with:
+# - Tag: v1.0.0
+# - Release notes from milestone issues
+# - Commit log since last release
+# - Auto-generated changelog
+```
+
+### Progress Tracking
+
+**Live progress in issues:**
+```bash
+# As Sheep It works, it updates the issue:
+# - Checks off acceptance criteria ✅
+# - Posts progress comments
+# - Updates labels (in progress → ready for review)
+# - Links commits and branches
+```
+
+**Resume after context loss:**
+```bash
+/sheep:resume
+# Reads git status + GitHub state
+# Shows: current branch, issue, progress
+# Continues exactly where you left off
+```
+
+### Workflow Hooks
+
+**Integrate with your CI/CD:**
+```yaml
+# .sheeprc.yml
+hooks:
+  pre_commit:
+    - "npm run lint"
+    - "npm run test"
+
+  pre_pr:
+    - "npm run build"
+    - "npm run test:e2e"
+
+  post_release:
+    - "./deploy.sh"
+```
+
 ## Philosophy
 
 **Git-first workflow orchestration.** GitHub already has all the infrastructure: issues, PRs, milestones, projects. Sheep It orchestrates the Git workflow around these primitives:
