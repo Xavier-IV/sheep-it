@@ -7,11 +7,13 @@ allowed-tools:
   - Bash(gh label list *)
   - Bash(gh api repos/:owner/:repo/milestones *)
   - Bash(gh search issues *)
+  - Bash(cat .sheeprc.yml *)
   - Glob
   - Grep
   - Read
   - AskUserQuestion
   - Task
+  - Skill
   - WebSearch
   - WebFetch
 ---
@@ -30,6 +32,69 @@ Use AskUserQuestion tool for all clarifications - make it feel like a collaborat
 </usage>
 
 <process>
+
+<step name="detect-adapter">
+**Detect and check for adapter:**
+
+Before starting the task brainstorm, check if an adapter is configured or can be auto-detected.
+
+**1. Check for config file:**
+```bash
+cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
+```
+
+**2. If config exists, parse adapter settings:**
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    task: "openspec:proposal"
+```
+
+**3. If no config, auto-detect available adapters:**
+
+Check for common adapter skill patterns:
+- `/openspec:proposal` → OpenSpec adapter detected
+- Other adapters can be added here
+
+**4. If adapter found and enabled:**
+
+```
+🔌 Adapter detected: OpenSpec
+
+The OpenSpec adapter will handle spec creation.
+Sheep It will create the GitHub issue from the adapter's output.
+```
+
+**Delegate to adapter skill:**
+```
+[Skill tool]
+skill: "{adapter.mappings.task}"  # e.g., "openspec:proposal"
+args: "{user's task description}"
+```
+
+**5. After adapter returns:**
+
+The adapter should return a structured spec. Use this to:
+- Extract title, description, acceptance criteria
+- Continue to the "structure" step with adapter's output
+- Create GitHub issue as normal
+
+**6. If no adapter or adapter disabled:**
+
+Continue with the normal sheep:task flow (understand step).
+
+**Show adapter status:**
+```
+# If adapter used:
+🔌 Using OpenSpec adapter for spec creation
+   → /openspec:proposal "{task description}"
+
+# If no adapter:
+📝 Using default Sheep It task flow
+```
+</step>
 
 <step name="understand">
 **Understand the task (use AskUserQuestion):**
