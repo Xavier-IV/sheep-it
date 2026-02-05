@@ -34,24 +34,93 @@ COMMAND_FILES=(
     "verify.md"
 )
 
-# Temporary directory for zip extraction
+# Temporary directory for zip extraction (set only by this script)
 TEMP_DIR=""
 
-# Cleanup function - removes temp directory on exit
-# Safety: only delete if path contains our unique marker
-cleanup() {
-    if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
-        # Safety check: only delete if path contains "sheep-it-install"
-        case "$TEMP_DIR" in
-            *sheep-it-install*)
-                rm -rf "$TEMP_DIR"
-                ;;
-        esac
+# Secure cleanup function with multiple safety checks
+# This is critical - we MUST NOT accidentally delete user data
+safe_cleanup() {
+    # Guard 1: Must be non-empty
+    if [ -z "$TEMP_DIR" ]; then
+        return 0
     fi
+
+    # Guard 2: Must exist and be a directory
+    if [ ! -d "$TEMP_DIR" ]; then
+        return 0
+    fi
+
+    # Guard 3: Must NOT be a symlink (prevent symlink attacks)
+    if [ -L "$TEMP_DIR" ]; then
+        echo "Warning: Temp directory is a symlink, skipping cleanup for safety" >&2
+        return 0
+    fi
+
+    # Guard 4: Blocklist - NEVER delete these patterns regardless of other checks
+    case "$TEMP_DIR" in
+        /|/home|/home/*|/Users|/Users/*|/root|/root/*|\
+        /etc|/etc/*|/usr|/usr/*|/var|/var/*|/bin|/bin/*|\
+        /sbin|/sbin/*|/lib|/lib/*|/opt|/opt/*|/System|/System/*|\
+        /Applications|/Applications/*|/Library|/Library/*|\
+        "$HOME"|"$HOME"/*|"${HOME}"|"${HOME}"/*)
+            # Exception: allow /var/tmp and /var/folders (macOS temp)
+            case "$TEMP_DIR" in
+                /var/tmp/*|/var/folders/*)
+                    # Allowed, continue to next checks
+                    ;;
+                *)
+                    echo "Warning: Refusing to delete path in protected location: $TEMP_DIR" >&2
+                    return 0
+                    ;;
+            esac
+            ;;
+    esac
+
+    # Guard 5: Allowlist - path MUST start with a known temp directory
+    local allowed=false
+    local resolved_tmpdir="${TMPDIR:-/tmp}"
+    # Remove trailing slash for consistent comparison
+    resolved_tmpdir="${resolved_tmpdir%/}"
+
+    case "$TEMP_DIR" in
+        /tmp/*|/var/tmp/*|/var/folders/*/*/*/*)
+            allowed=true
+            ;;
+        "${resolved_tmpdir}"/*)
+            allowed=true
+            ;;
+    esac
+
+    if [ "$allowed" = false ]; then
+        echo "Warning: Temp directory not in expected location, skipping cleanup: $TEMP_DIR" >&2
+        return 0
+    fi
+
+    # Guard 6: Directory basename MUST match our exact pattern
+    local dirname
+    dirname=$(basename "$TEMP_DIR")
+    case "$dirname" in
+        sheep-it-install.??????)
+            # Matches exactly: sheep-it-install. followed by 6 characters
+            ;;
+        *)
+            echo "Warning: Temp directory name doesn't match expected pattern, skipping cleanup: $dirname" >&2
+            return 0
+            ;;
+    esac
+
+    # Guard 7: Verify our marker file exists (proves we created this directory)
+    if [ ! -f "$TEMP_DIR/.sheep-it-install-marker" ]; then
+        echo "Warning: Marker file not found, skipping cleanup for safety" >&2
+        return 0
+    fi
+
+    # All guards passed - safe to delete
+    rm -rf "$TEMP_DIR"
 }
 
 # Set trap to ensure cleanup runs on exit (success or failure)
-trap cleanup EXIT
+trap safe_cleanup EXIT
 
 # Detect operating system
 detect_os() {
@@ -146,8 +215,11 @@ if [ "$USE_ZIP" = true ]; then
     # Fast mode: Download zip archive and extract
     echo "Downloading commands (zip archive)..."
 
-    # Create temporary directory
+    # Create temporary directory with explicit naming
     TEMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/sheep-it-install.XXXXXX")
+
+    # Create marker file to prove we created this directory (security measure)
+    touch "$TEMP_DIR/.sheep-it-install-marker"
 
     ZIP_FILE="${TEMP_DIR}/sheep-it.zip"
 
