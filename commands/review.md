@@ -7,7 +7,19 @@ allowed-tools:
   - Bash(gh pr checks *)
   - Bash(gh pr review *)
   - Bash(gh issue view *)
+  - Bash(gh api repos/*/pulls/*/comments*)
+  - Bash(gh api repos/*/pulls/*/reviews*)
+  - Bash(gh api repos/*/issues/*/comments*)
+  - Bash(gh run list *)
+  - Bash(gh run view *)
+  - Bash(git checkout *)
+  - Bash(git fetch *)
+  - Bash(git push origin *)
+  - Bash(git add *)
+  - Bash(git commit *)
   - Read
+  - Edit
+  - Write
   - Glob
   - Grep
   - AskUserQuestion
@@ -70,6 +82,50 @@ Parse:
 - CI status
 </step>
 
+<step name="fetch-comments">
+**Fetch PR and issue comments for feedback analysis:**
+
+```bash
+# Get repository info
+REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
+
+# PR review comments (inline code comments)
+gh api "repos/${REPO}/pulls/45/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at, path: .path, line: .line, in_reply_to_id: .in_reply_to_id}'
+
+# PR reviews (approval/request-changes/comment reviews)
+gh api "repos/${REPO}/pulls/45/reviews" --jq '.[] | {user: .user.login, state: .state, body: .body, submitted_at: .submitted_at}'
+
+# Linked issue comments (from "Closes #22")
+gh api "repos/${REPO}/issues/22/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at}'
+```
+
+**Parse comments to identify actionable items:**
+
+Look for:
+- **Questions:** Comments containing `?` or phrases like "why", "how", "could you explain"
+- **Change requests:** Comments with phrases like "please", "should", "must", "need to", "consider"
+- **Unresolved threads:** PR comments without replies, or threads still marked unresolved
+- **Review states:** `CHANGES_REQUESTED` reviews that haven't been dismissed
+
+**Categorize feedback:**
+
+```
+Actionable Feedback Analysis:
+
+1. CHANGES_REQUESTED reviews:
+   - User, date, and summary of requested changes
+
+2. Unanswered questions:
+   - Questions from reviewers without responses
+
+3. Unaddressed suggestions:
+   - Specific change requests that may not be implemented
+
+4. Recent discussion:
+   - Any comments in the last 24-48 hours that may need attention
+```
+</step>
+
 <step name="review-checklist">
 **Review against checklist:**
 
@@ -89,6 +145,83 @@ Parse:
 
 4. **CI Status:**
    - All checks passing?
+</step>
+
+<step name="analyze-ci-errors">
+**If CI checks are failing, fetch detailed error logs:**
+
+```bash
+# Get failed workflow runs for this PR
+gh pr checks 45 --json name,state,conclusion --jq '.[] | select(.conclusion == "failure")'
+
+# List recent workflow runs for the PR branch
+gh run list --branch feature/22-description --limit 5 --json databaseId,name,status,conclusion
+
+# Get detailed logs for a failed run (replace RUN_ID with actual ID)
+gh run view RUN_ID --log-failed
+```
+
+**Parse and summarize errors:**
+
+Look for common patterns:
+- **Build errors:** TypeScript/compilation failures, missing dependencies
+- **Test failures:** Failed assertions, snapshot mismatches
+- **Lint errors:** ESLint, Rubocop, formatting issues
+- **Type errors:** TypeScript strict mode violations
+
+**Display CI Error Summary:**
+
+```
+CI Errors Detected:
+
+1. build (run #12345) - failed 5 min ago
+   ❌ TypeScript compilation error
+   src/utils/date.ts:45:12
+   Property 'format' does not exist on type 'Date'
+
+   💡 Likely fix: Import date-fns or use toLocaleDateString()
+
+2. test (run #12346) - failed 5 min ago
+   ❌ 2 tests failed
+
+   FAIL src/components/Button.test.tsx
+   Line 23: Expected "Submit" but received "Submti"
+
+   💡 Likely fix: Typo in Button component text
+
+3. lint (run #12347) - failed 5 min ago
+   ❌ ESLint errors
+
+   src/hooks/useData.ts:12:5
+   'data' is assigned but never used (no-unused-vars)
+
+   💡 Likely fix: Remove unused variable or use it
+```
+
+**If errors are fixable, offer to resolve:**
+
+```
+[AskUserQuestion]
+Question: "CI is failing. Want me to analyze and fix these errors?"
+Header: "CI Errors"
+Options:
+- "Yes, fix them (Recommended)" - description: "I'll fix and push to the PR"
+- "Show details only" - description: "Just show me the full logs"
+- "Skip CI analysis" - description: "Continue with review"
+```
+
+**If user chooses to fix:**
+
+1. Read the affected files
+2. Apply fixes based on error analysis
+3. Commit with message: `fix(#issue): resolve CI errors - [description]`
+4. Push to PR branch
+5. Wait for CI to re-run (or continue review)
+
+```bash
+# After fixing, push to the PR branch
+git push origin HEAD
+```
 </step>
 
 <step name="examine-changes">
@@ -148,8 +281,37 @@ Tests:
 ⚠️  Missing: Controller specs
 
 CI: ✅ All checks passing
+    (or)
+CI: ❌ 2 checks failing
+   • build - TypeScript error in src/utils/date.ts:45
+   • test - 2 tests failed in Button.test.tsx
+
+Unresolved Feedback:
+⚠️  2 items need attention
+
+1. @reviewer1 (2 days ago) - CHANGES_REQUESTED
+   "Please add input validation for the date field"
+
+2. @reviewer2 (1 day ago) - Question
+   "Why did you choose this approach over using callbacks?"
 ```
 
+**If there's unresolved feedback, highlight it:**
+
+```
+⚠️  UNRESOLVED FEEDBACK DETECTED
+
+There are 2 unresolved items from previous reviews:
+- 1 CHANGES_REQUESTED review by @reviewer1
+- 1 unanswered question from @reviewer2
+
+Consider addressing these before approving, or verify they've been
+resolved in the latest commits.
+```
+
+**Decision options depend on feedback status:**
+
+If NO unresolved feedback:
 ```
 [AskUserQuestion]
 Question: "What's your review decision?"
@@ -160,6 +322,37 @@ Options:
 - "Comment only" - description: "Leave feedback without blocking"
 - "Need more time" - description: "I'll review more thoroughly"
 ```
+
+If HAS unresolved feedback:
+```
+[AskUserQuestion]
+Question: "There's unresolved feedback. What's your review decision?"
+Header: "Decision"
+Options:
+- "Review feedback first (Recommended)" - description: "Check if issues were addressed"
+- "Approve anyway" - description: "Feedback has been addressed in commits"
+- "Request changes" - description: "Needs fixes before merge"
+- "Comment only" - description: "Leave feedback without blocking"
+```
+
+If CI is FAILING:
+```
+[AskUserQuestion]
+Question: "CI is failing. What do you want to do?"
+Header: "CI Failed"
+Options:
+- "Fix CI errors (Recommended)" - description: "I'll analyze and fix the errors"
+- "Continue review anyway" - description: "Ignore CI for now"
+- "Stop review" - description: "Can't review until CI passes"
+```
+
+If user chooses "Fix CI errors":
+1. Checkout the PR branch locally
+2. Analyze the error logs from `gh run view --log-failed`
+3. Read and fix the affected files
+4. Commit: `fix(#issue): resolve CI errors`
+5. Push to PR branch
+6. Continue with review (or wait for CI to re-run)
 </step>
 
 <step name="submit-review">
