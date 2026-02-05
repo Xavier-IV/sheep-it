@@ -604,18 +604,18 @@ This is the core work. Based on the issue spec:
    - Match coding style
    - Use framework generators if available (per CLAUDE.md)
 
-4. **Make atomic commits after each logical change:**
+4. **Make ATOMIC commits - commit early, commit often:**
 
-   IMPORTANT: Create commits frequently, after each meaningful unit of work.
-   Each commit should represent a single logical change that could be understood
-   and potentially reverted independently.
+   CRITICAL: Each commit should be as small as possible while remaining coherent.
+   Think "one change, one commit" not "one feature, one commit".
+
+   **The Golden Rule: If you can describe what you did with "and", it's too big.**
 
    **Commit message format:**
    ```
    type(#issue): short description
 
    Detailed explanation of what changed and why.
-   Reference specific files or functions if helpful.
 
    Acceptance-Criteria: [criterion being addressed]
    ```
@@ -628,16 +628,55 @@ This is the core work. Based on the issue spec:
    - `docs` - Documentation changes
    - `chore` - Maintenance tasks
 
-   **Example commits:**
-   ```bash
-   git add app/models/working_hour.rb db/migrate/xxx_create_working_hours.rb
-   git commit -m "$(cat <<'EOF'
-   feat(#22): add WorkingHour model and migration
+   **ATOMIC COMMIT RULES:**
 
-   Created the core model for storing studio working hours.
-   - Added day_of_week, opens_at, closes_at columns
-   - Added belongs_to :studio association
-   - Added uniqueness validation for day per studio
+   ✅ **DO - Commit separately:**
+   - Each new file (unless generated together like model+migration)
+   - Each function/method added
+   - Each bug fix (even one-liners)
+   - Each refactor
+   - Model changes separate from controller changes
+   - Controller changes separate from view changes
+   - Tests separate from implementation
+   - Config changes separate from code changes
+
+   ❌ **DON'T - Never bundle these:**
+   - Feature code + refactoring in same commit
+   - Multiple unrelated files
+   - Implementation + tests (unless TDD where test comes first)
+   - Bug fix + feature addition
+   - Multiple acceptance criteria in one commit
+
+   **PRE-COMMIT CHECKLIST - Ask yourself:**
+   1. Can I describe this commit WITHOUT using "and"?
+   2. Does this commit do exactly ONE thing?
+   3. If I reverted this, would only ONE change be undone?
+   4. Are all files in this commit directly related?
+
+   If any answer is "no", split the commit.
+
+   **GOOD Example - Truly atomic commits:**
+
+   ```bash
+   # Commit 1: Just the migration
+   git add db/migrate/xxx_create_working_hours.rb
+   git commit -m "$(cat <<'EOF'
+   feat(#22): add working_hours migration
+
+   Creates working_hours table with day_of_week, opens_at, closes_at.
+
+   Acceptance-Criteria: Database schema for working hours
+   EOF
+   )"
+   ```
+
+   ```bash
+   # Commit 2: Just the model
+   git add app/models/working_hour.rb
+   git commit -m "$(cat <<'EOF'
+   feat(#22): add WorkingHour model
+
+   Adds model with validations and studio association.
 
    Acceptance-Criteria: Working hours model exists
    EOF
@@ -645,26 +684,58 @@ This is the core work. Based on the issue spec:
    ```
 
    ```bash
-   git add app/controllers/hours_controller.rb app/views/hours/
+   # Commit 3: Just the controller
+   git add app/controllers/working_hours_controller.rb
    git commit -m "$(cat <<'EOF'
-   feat(#22): add working hours configuration UI
+   feat(#22): add WorkingHoursController
 
-   Built the interface for configuring studio hours.
-   - Added HoursController with index/update actions
-   - Created form for editing hours per day
-   - Added validation error display
+   Adds index and update actions for managing hours.
 
-   Acceptance-Criteria: Configuration UI allows editing hours
+   Acceptance-Criteria: API endpoints for working hours
    EOF
    )"
    ```
 
+   ```bash
+   # Commit 4: Just one view file
+   git add app/views/working_hours/index.html.erb
+   git commit -m "$(cat <<'EOF'
+   feat(#22): add working hours index view
+
+   Lists all working hours for a studio.
+
+   Acceptance-Criteria: Configuration UI displays hours
+   EOF
+   )"
+   ```
+
+   **BAD Example - What NOT to do:**
+
+   ```bash
+   # ❌ TOO BIG - bundles model, controller, views, and tests
+   git add app/models/working_hour.rb \
+           app/controllers/working_hours_controller.rb \
+           app/views/working_hours/ \
+           spec/models/working_hour_spec.rb
+   git commit -m "feat(#22): add working hours feature"
+   # This commit does 4+ things!
+   ```
+
+   ```bash
+   # ❌ MIXED CONCERNS - feature + refactor
+   git add app/models/studio.rb app/models/working_hour.rb
+   git commit -m "feat(#22): add WorkingHour and refactor Studio"
+   # Split into: 1) refactor commit, 2) feature commit
+   ```
+
    **When to commit:**
-   - After creating a new file/function
-   - After completing a subtask
-   - After fixing an edge case
-   - After adding tests for a feature
-   - Before switching to a different area of the codebase
+   - After creating/modifying ANY file
+   - After each function/method
+   - After each config change
+   - After any refactoring (even small)
+   - BEFORE switching to a different file or concern
+
+   **Commit frequency target:** Aim for 5-15+ commits per feature, not 1-3.
 
 5. **Update issue checkboxes as you complete criteria:**
    - When an acceptance criterion is done, update the issue body
