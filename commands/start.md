@@ -15,6 +15,7 @@ allowed-tools:
   - Bash(git fetch *)
   - Bash(git pull *)
   - Bash(git status *)
+  - Bash(cat .sheeprc.yml *)
   - Read
   - Write
   - Edit
@@ -22,6 +23,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
   - Task
+  - Skill
   - WebSearch
   - WebFetch
 ---
@@ -446,6 +448,79 @@ Assigned to: @me
 
 Will update acceptance criteria as I progress."
 ```
+</step>
+
+<step name="detect-adapter">
+**Detect and check for adapter:**
+
+Before implementing, check if an adapter should handle the implementation.
+
+**1. Check for config file:**
+```bash
+cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
+```
+
+**2. If config exists, parse adapter settings:**
+```yaml
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    start: "openspec:apply"
+```
+
+**3. If no config, auto-detect available adapters:**
+
+Check for common adapter skill patterns:
+- `/openspec:apply` → OpenSpec adapter detected for implementation
+- Other adapters can be added here
+
+**4. If adapter found and enabled:**
+
+```
+🔌 Adapter detected: OpenSpec
+
+The OpenSpec adapter will handle implementation.
+Sheep It handled: branch creation, assignment, GitHub tracking
+OpenSpec handles: code implementation
+```
+
+**Delegate to adapter skill:**
+```
+[Skill tool]
+skill: "{adapter.mappings.start}"  # e.g., "openspec:apply"
+args: "{issue number or context}"
+```
+
+The adapter will take over the implementation. When it completes,
+Sheep It will continue with verification and completion steps.
+
+**5. If no adapter or adapter disabled:**
+
+Continue with the normal sheep:start implementation flow.
+
+**Show adapter status:**
+```
+# If adapter used:
+🔌 Using OpenSpec adapter for implementation
+   → /openspec:apply {issue context}
+
+   Sheep It handled:
+   ✓ Branch creation
+   ✓ Issue assignment
+   ✓ GitHub tracking
+
+   OpenSpec handles:
+   → Code implementation
+   → Commits
+
+# If no adapter:
+📝 Using default Sheep It implementation flow
+```
+
+**After adapter completes:**
+
+Continue to the `verify` step to check acceptance criteria.
 </step>
 
 <step name="understand-codebase">
