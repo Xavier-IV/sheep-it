@@ -101,6 +101,51 @@ commits:
 auto_update:
   check_criteria: true   # Auto-check acceptance criteria
   progress_comments: true
+
+# Adapter integration (optional)
+adapter:
+  enabled: true
+  name: "openspec"
+  mappings:
+    task: "openspec:proposal"
+    start: "openspec:apply"
+    ship: "openspec:archive"
+```
+
+## Adapters
+
+Sheep It can integrate with external workflow tools (adapters) for enhanced spec creation and implementation.
+
+### Supported Adapters
+
+| Adapter | Description | Integration |
+|---------|-------------|-------------|
+| **[OpenSpec](https://github.com/Xavier-IV/openspec)** | Structured spec creation with PRDs | `proposal` → `apply` → `archive` |
+
+### How It Works
+
+When an adapter is configured:
+
+```
+/sheep:task "Add login"     →  Calls /openspec:proposal
+                               Creates GitHub issue from spec
+
+/sheep:start 22             →  Creates branch, assigns issue
+                               Calls /openspec:apply for implementation
+
+/sheep:it                   →  Creates PR
+                               Calls /openspec:archive to finalize
+```
+
+Sheep It handles all GitHub operations (issues, PRs, tracking) while the adapter handles spec creation and implementation details.
+
+### Auto-Detection
+
+Adapters are auto-detected from available Claude Code skills. To disable:
+
+```yaml
+adapter:
+  enabled: false
 ```
 
 ## Philosophy
