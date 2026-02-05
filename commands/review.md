@@ -73,6 +73,50 @@ Parse:
 - CI status
 </step>
 
+<step name="fetch-comments">
+**Fetch PR and issue comments for feedback analysis:**
+
+```bash
+# Get repository info
+REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
+
+# PR review comments (inline code comments)
+gh api "repos/${REPO}/pulls/45/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at, path: .path, line: .line, in_reply_to_id: .in_reply_to_id}'
+
+# PR reviews (approval/request-changes/comment reviews)
+gh api "repos/${REPO}/pulls/45/reviews" --jq '.[] | {user: .user.login, state: .state, body: .body, submitted_at: .submitted_at}'
+
+# Linked issue comments (from "Closes #22")
+gh api "repos/${REPO}/issues/22/comments" --jq '.[] | {user: .user.login, body: .body, created_at: .created_at}'
+```
+
+**Parse comments to identify actionable items:**
+
+Look for:
+- **Questions:** Comments containing `?` or phrases like "why", "how", "could you explain"
+- **Change requests:** Comments with phrases like "please", "should", "must", "need to", "consider"
+- **Unresolved threads:** PR comments without replies, or threads still marked unresolved
+- **Review states:** `CHANGES_REQUESTED` reviews that haven't been dismissed
+
+**Categorize feedback:**
+
+```
+Actionable Feedback Analysis:
+
+1. CHANGES_REQUESTED reviews:
+   - User, date, and summary of requested changes
+
+2. Unanswered questions:
+   - Questions from reviewers without responses
+
+3. Unaddressed suggestions:
+   - Specific change requests that may not be implemented
+
+4. Recent discussion:
+   - Any comments in the last 24-48 hours that may need attention
+```
+</step>
+
 <step name="review-checklist">
 **Review against checklist:**
 
