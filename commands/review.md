@@ -195,6 +195,28 @@ Tests:
 ⚠️  Missing: Controller specs
 
 CI: ✅ All checks passing
+
+Unresolved Feedback:
+⚠️  2 items need attention
+
+1. @reviewer1 (2 days ago) - CHANGES_REQUESTED
+   "Please add input validation for the date field"
+
+2. @reviewer2 (1 day ago) - Question
+   "Why did you choose this approach over using callbacks?"
+```
+
+**If there's unresolved feedback, highlight it:**
+
+```
+⚠️  UNRESOLVED FEEDBACK DETECTED
+
+There are 2 unresolved items from previous reviews:
+- 1 CHANGES_REQUESTED review by @reviewer1
+- 1 unanswered question from @reviewer2
+
+Consider addressing these before approving, or verify they've been
+resolved in the latest commits.
 ```
 
 ```
