@@ -183,7 +183,7 @@ If "Yes, enable adapter":
 adapter:
   enabled: true
   name: "openspec"
-  quick_mode: "opsx:ff"          # Fast spec for --quick
+  quick_mode: "opsx:ff"          # Default /sheep:task mode
   research_mode: "opsx:explore"  # Deep research for --deep
   apply: "opsx:apply"            # Implementation
   verify: "opsx:verify"          # Verification
@@ -232,11 +232,11 @@ Route to selected commands in order: milestone → task → config.
 **If adapter was configured, also show:**
 ```
 🔌 Adapter Integration:
-   /sheep:task --quick → /opsx:ff
-   /sheep:task --deep  → /opsx:explore
-   /sheep:start        → /opsx:apply
-   /sheep:verify       → /opsx:verify
-   /sheep:it           → /opsx:verify + /opsx:archive
+   /sheep:task        → /opsx:ff (default)
+   /sheep:task --deep → /opsx:explore
+   /sheep:start       → /opsx:apply
+   /sheep:verify      → /opsx:verify
+   /sheep:it          → /opsx:verify + /opsx:archive
 ```
 </step>
 

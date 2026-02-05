@@ -25,8 +25,7 @@ Use AskUserQuestion tool for all clarifications - make it feel like a collaborat
 
 <usage>
 ```
-/sheep:task "Add user login"        # Interactive brainstorm (default, no adapter)
-/sheep:task "Add profile" --quick   # Fast spec with OpenSpec (opsx:ff)
+/sheep:task "Add user login"        # Fast spec with OpenSpec (default: opsx:ff)
 /sheep:task "Add payments" --deep   # Deep research with OpenSpec (opsx:explore)
 ```
 </usage>
@@ -48,20 +47,19 @@ cat .sheeprc.yml 2>/dev/null | grep -A5 "adapter:"
 adapter:
   enabled: true
   name: "openspec"
-  quick_mode: "opsx:ff"       # For --quick flag
-  research_mode: "opsx:explore"  # For --deep flag
+  quick_mode: "opsx:ff"          # Default mode (no flag)
+  research_mode: "opsx:explore"  # Deep mode (--deep flag)
 ```
 
 **3. Determine which mode to use:**
 
-- **No flag (default):** Pure Sheep It, no adapter (skip to understand step)
-- **`--quick` flag:** Use adapter's `quick_mode` (opsx:ff)
+- **No flag (default):** Use adapter's `quick_mode` (opsx:ff) if adapter enabled
 - **`--deep` flag:** Use adapter's `research_mode` (opsx:explore)
 
-**4. If `--quick` flag and adapter enabled:**
+**4. Default mode (no flag) with adapter:**
 
 ```
-🔌 Quick mode: Using OpenSpec for fast spec generation
+⚡ Quick mode: Fast OpenSpec spec generation
    → /opsx:ff (new + all artifacts at once)
 ```
 
@@ -75,12 +73,12 @@ args: "{user's task description}"
 OpenSpec will run: `opsx:new` → `opsx:ff` internally.
 After completion, extract the spec and continue to create GitHub issue.
 
-**5. If `--deep` flag and adapter enabled:**
+**5. Deep mode (--deep flag) with adapter:**
 
 Continue to the existing `deep-research` step below, but also use OpenSpec:
 
 ```
-🔌 Research mode: Using OpenSpec for exploration
+🔬 Research mode: Deep OpenSpec exploration
    → /opsx:explore (investigate before committing)
 ```
 
@@ -94,20 +92,20 @@ args: "{user's task description}"
 After exploration, OpenSpec will chain to `opsx:new` → `opsx:continue`.
 Extract the spec and continue to create GitHub issue.
 
-**6. If no flag or adapter disabled:**
+**6. If no adapter or adapter disabled:**
 
-Continue with the normal sheep:task flow (understand step).
+Fall back to Sheep It's interactive brainstorming (understand step).
 
 **Show mode status:**
 ```
-# Default mode:
-📝 Interactive mode - Sheep It brainstorming
-
-# Quick mode:
-⚡ Quick mode - Fast OpenSpec spec generation
+# Default mode (with adapter):
+⚡ Quick mode - Fast OpenSpec spec generation (opsx:ff)
 
 # Deep mode:
-🔬 Research mode - OpenSpec exploration + planning
+🔬 Research mode - OpenSpec exploration + planning (opsx:explore)
+
+# No adapter:
+📝 Interactive mode - Sheep It brainstorming
 ```
 </step>
 

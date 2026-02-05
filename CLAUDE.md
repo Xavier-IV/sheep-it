@@ -72,7 +72,7 @@ auto_update:
 adapter:
   enabled: true                  # Enable adapter integration
   name: "openspec"               # Adapter name
-  quick_mode: "opsx:ff"          # For /sheep:task --quick
+  quick_mode: "opsx:ff"          # For /sheep:task (default)
   research_mode: "opsx:explore"  # For /sheep:task --deep
   apply: "opsx:apply"            # For /sheep:start
   verify: "opsx:verify"          # For /sheep:verify (and auto in /sheep:it)
@@ -133,9 +133,9 @@ Skills check for adapters before proceeding:
 ```
 
 Example in `task.md`:
-- Default mode: Pure Sheep It brainstorming (no adapter)
-- `--quick` mode: Delegates to OpenSpec `opsx:ff` for fast spec generation
+- Default mode: Delegates to OpenSpec `opsx:ff` for fast spec generation
 - `--deep` mode: Delegates to OpenSpec `opsx:explore` for research
+- Falls back to Sheep It brainstorming if no adapter configured
 - Takes adapter output and creates GitHub issue
 
 ### YOLO Mode Safety

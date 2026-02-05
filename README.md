@@ -21,25 +21,19 @@ Requires [Claude Code](https://claude.ai/code) and [GitHub CLI](https://cli.gith
 
 ## See It In Action
 
-### Step 1: Create a task (Three modes)
+### Step 1: Create a task (Two modes)
 
-**Default: Interactive brainstorming**
+**Default: Quick spec with OpenSpec**
 ```
 /sheep:task "Add user login"
 ```
-Claude asks clarifying questions, refines scope, creates a GitHub Issue. Pure Sheep It, no adapter needed.
+Fast spec generation → OpenSpec creates complete spec (proposal, specs, design) → GitHub Issue. Best for most features.
 
-**Quick: Fast spec with OpenSpec**
-```
-/sheep:task "Add user profile" --quick
-```
-Minimal questions → OpenSpec generates complete spec (proposal, specs, design) → GitHub Issue. Best for clear requirements.
-
-**Deep: Research mode with OpenSpec**
+**Deep: Research mode**
 ```
 /sheep:task "Add payments" --deep
 ```
-Parallel research agents → OpenSpec exploration → Detailed spec → GitHub Issue. Best for complex features.
+Parallel research agents → OpenSpec exploration → Detailed spec → GitHub Issue. Best for complex features needing investigation.
 
 ### Step 2: Implement (Hybrid Approach)
 
@@ -119,7 +113,7 @@ Add to `.sheeprc.yml`:
 adapter:
   enabled: true
   name: "openspec"
-  quick_mode: "opsx:ff"          # Fast spec (/sheep:task --quick)
+  quick_mode: "opsx:ff"          # Fast spec (/sheep:task default)
   research_mode: "opsx:explore"  # Deep research (/sheep:task --deep)
   apply: "opsx:apply"            # Implementation (/sheep:start)
   verify: "opsx:verify"          # Verification (/sheep:verify, auto in /sheep:it)

@@ -95,8 +95,7 @@ Adapters delegate specific workflow steps to external tools while Sheep It handl
 
 | Sheep Command | Adapter Mapping | What Happens |
 |---------------|-----------------|--------------|
-| `/sheep:task` (default) | None | Pure Sheep It brainstorming → GitHub issue |
-| `/sheep:task --quick` | `quick_mode` → `opsx:ff` | Fast spec generation → GitHub issue |
+| `/sheep:task` (default) | `quick_mode` → `opsx:ff` | Fast spec generation → GitHub issue |
 | `/sheep:task --deep` | `research_mode` → `opsx:explore` | Deep research → GitHub issue |
 | `/sheep:start` | `apply` → `opsx:apply` | Sheep handles branch/assignment, adapter implements |
 | `/sheep:verify` | `verify` → `opsx:verify` | Adapter validates implementation (optional, manual) |
@@ -132,8 +131,8 @@ skill patterns (e.g., `/opsx:ff`). When detected:
 🔌 Adapter detected: OpenSpec
 
 Using OpenSpec for:
-  • Quick mode (/sheep:task --quick → opsx:ff)
-  • Research mode (/sheep:task --deep → opsx:explore)
+  • Task creation (/sheep:task → opsx:ff by default)
+  • Deep research (/sheep:task --deep → opsx:explore)
   • Implementation (/sheep:start → opsx:apply)
   • Verification (/sheep:verify → opsx:verify)
   • Finalization (/sheep:it → opsx:verify + opsx:archive)

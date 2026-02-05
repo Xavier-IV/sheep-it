@@ -131,16 +131,16 @@ Options:
 If "Custom" selected:
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for quick mode (/sheep:task --quick):"
-Header: "Quick mode"
+Question: "Enter adapter skill for default task creation (/sheep:task):"
+Header: "Task mode"
 Options:
 - "opsx:ff (Recommended)" - description: "OpenSpec fast-forward (new + all artifacts)"
-- "None" - description: "Disable --quick flag"
+- "None" - description: "Use Sheep It interactive brainstorming"
 ```
 
 ```
 [AskUserQuestion]
-Question: "Enter adapter skill for research mode (/sheep:task --deep):"
+Question: "Enter adapter skill for deep research (/sheep:task --deep):"
 Header: "Research mode"
 Options:
 - "opsx:explore (Recommended)" - description: "OpenSpec exploration (explore + new + continue)"
@@ -222,7 +222,7 @@ Settings:
   Commits: Conventional (feat:, fix:, etc.)
   Labels: enhancement, bug, chore
   Auto-update: ✅ checkboxes, ✅ comments
-  Adapter: openspec (--quick → ff, --deep → explore, start → apply, verify → verify, ship → archive)
+  Adapter: openspec (task → ff, --deep → explore, start → apply, verify → verify, ship → archive)
 
 💡 Tip: Commit this file to share settings with your team.
 ```
