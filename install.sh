@@ -38,9 +38,15 @@ COMMAND_FILES=(
 TEMP_DIR=""
 
 # Cleanup function - removes temp directory on exit
+# Safety: only delete if path contains our unique marker
 cleanup() {
     if [ -n "$TEMP_DIR" ] && [ -d "$TEMP_DIR" ]; then
-        rm -rf "$TEMP_DIR"
+        # Safety check: only delete if path contains "sheep-it-install"
+        case "$TEMP_DIR" in
+            *sheep-it-install*)
+                rm -rf "$TEMP_DIR"
+                ;;
+        esac
     fi
 }
 
@@ -141,7 +147,7 @@ if [ "$USE_ZIP" = true ]; then
     echo "Downloading commands (zip archive)..."
 
     # Create temporary directory
-    TEMP_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'sheep-it')
+    TEMP_DIR=$(mktemp -d "${TMPDIR:-/tmp}/sheep-it-install.XXXXXX")
 
     ZIP_FILE="${TEMP_DIR}/sheep-it.zip"
 
